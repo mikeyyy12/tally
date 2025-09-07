@@ -15,7 +15,6 @@ export const Block = ({ block, key }: { block: Blocktype, key: number }) => {
         case "text":
             return (
                 <div key={key} id={block.id} contentEditable={'true'}
-
                     onInput={(e) => {
                         const value = e.currentTarget.textContent;
                         console.log(value);
@@ -41,6 +40,7 @@ export const Block = ({ block, key }: { block: Blocktype, key: number }) => {
                         <div key={idx} className='flex items-center gap-2'>
                             <div className='rounded-[3px]  h-[17px] w-[18px] bg-white  shadow-checkbox'></div>
                             <div
+                                suppressContentEditableWarning
                                 data-placeholder="Input"
                                 contentEditable="true"
                                 className={cn("[&:empty]:before:content-[attr(data-placeholder)]  [&:empty]:before:text-neutral-400",
@@ -52,16 +52,17 @@ export const Block = ({ block, key }: { block: Blocktype, key: number }) => {
             )
         case "radio":
             return (
-                <div key={key} id={block.id} className=" flex flex-col px-1 border shadow-checkbox">
+                <div key={key} id={block.id} className=" flex flex-col px-1 gap-3  ">
                     {block.options.map((option, idx) => (
-                        <div key={idx} className='flex items-center gap-2'>
-                            <div className='rounded-[3px]  h-[17px] w-[18px] bg-white  shadow-checkbox'></div>
+                        <div key={idx} className='flex items-center gap-2 max-w-fit rounded-lg shadow-checkbox px-3 '>
+                            <div className='rounded-[3px]  h-[17px] w-[18px] bg-radio  shadow-checkbox p-2 text-xs font-bold text-shadow-xl flex items-center justify-center text-white '>{option.letter}</div>
                             <div
                                 data-placeholder="Input"
                                 contentEditable="true"
-                                className={cn("[&:empty]:before:content-[attr(data-placeholder)]  [&:empty]:before:text-neutral-400",
-                                    "w-full h-full text-sm  focus:outline-none py-2 font-normal"
-                                )} >{option}</div>
+                                suppressContentEditableWarning
+                                className={cn(
+                                    "w-full h-full text-sm  focus:outline-none py-2 font-normal text-neutral-800"
+                                )} >{option.value}</div>
                         </div>
                     ))}
                 </div>

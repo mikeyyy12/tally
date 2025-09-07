@@ -1,11 +1,11 @@
 interface RadioOption {
-  letter: string; // 'A', 'B', 'C'...
-  value: string;  // user-entered option text
+  letter: string;
+  value: string;
 }
 
 interface BlockBase {
   id: string;
-  type: "text" | "input" | "checkbox" | "radio";
+  type: "text" | "input" | "checkbox" | "radio" | "textarea";
 }
 
 interface TextBlock extends BlockBase {
@@ -19,13 +19,17 @@ interface InputBlock extends BlockBase {
   required?: boolean;
 }
 
+interface AreaBlock extends BlockBase{
+  type:"textarea";
+  label:string;
+  require?:boolean;
+}
+
 interface CheckboxBlock extends BlockBase {
   type: "checkbox";
   label: string;
   options: string[];
 }
-
-
 
 interface RadioBlock extends BlockBase {
   type: "radio";

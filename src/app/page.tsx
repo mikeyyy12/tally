@@ -1,6 +1,7 @@
 "use client"
 
 import { EditorPage } from "@/components/editor-page";
+import { Label } from "@/components/label";
 
 
 const randomGenerator = () => {
@@ -10,10 +11,14 @@ const randomGenerator = () => {
 
 export default function Home() {
 
-  return (
-    <div className="relative min-h-screen max-w-4xl mx-auto mt-12 border-2 border-neutral-300 shadow-lg p-8 rounded-xl">
-      <EditorPage />
 
-    </div >
+  return (
+    <div className="relative h-full w-full min-h-screen flex items-center justify-center">
+      <div className="max-w-4xl w-full border-2 border-neutral-300 shadow-lg p-8 rounded-xl">
+        <EditorPage />
+      </div>
+
+    </div>
+
   );
 }
