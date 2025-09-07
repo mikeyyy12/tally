@@ -2,7 +2,7 @@
 import { Block } from "@/components/block"
 import { Label } from "@/components/label";
 import { Blocktype } from "@/utils/type"
-import { ChangeEvent, useState } from "react"
+import { ChangeEvent, useEffect, useState } from "react"
 import { v4 as uuidv4 } from 'uuid';
 
 
@@ -16,6 +16,10 @@ export const EditorPage = () => {
     { type: "radio", id: uuidv4(), label: "Are you above 18", options: [{ letter: "A", value: "true" }, { letter: "B", value: "false", }] }
   ])
 
+  useEffect(() => {
+    console.log(blocks)
+  }, [blocks])
+
   return (
     <div className="flex flex-col gap-4  ">
       <div >
@@ -23,13 +27,16 @@ export const EditorPage = () => {
       </div>
       <div className="flex flex-col gap-2">
         {blocks.map((block, idx) => (
-          <Block block={block} key={idx} />
+          <Block key={idx} block={block} />
         ))}
       </div>
       <div className="px-4 py-2 bg-sky-500 text-white w-fit rounded-lg cursor-pointer"
         onClick={() => setIsOpen(!isOpen)}
       >Add</div>
-      {isOpen && <Label onClick={() => setIsOpen(false)} />}
+      {isOpen && <Label onClick={() => {
+        setIsOpen(false)
+        console.log("closing")
+      }} setBlocks={setBlocks} />}
     </div>
   )
 }

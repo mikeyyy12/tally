@@ -1,4 +1,4 @@
-interface RadioOption {
+export interface RadioOption {
   letter: string;
   value: string;
 }
@@ -10,7 +10,7 @@ interface BlockBase {
 
 interface TextBlock extends BlockBase {
   type: "text";
-  content: string;
+  content?: string;
 }
 
 interface InputBlock extends BlockBase {
