@@ -1,3 +1,8 @@
+interface RadioOption {
+  letter: string; // 'A', 'B', 'C'...
+  value: string;  // user-entered option text
+}
+
 interface BlockBase {
   id: string;
   type: "text" | "input" | "checkbox" | "radio";
@@ -20,10 +25,12 @@ interface CheckboxBlock extends BlockBase {
   options: string[];
 }
 
+
+
 interface RadioBlock extends BlockBase {
   type: "radio";
   label: string;
-  options: string[];
+  options: RadioOption[];
 }
 
 export type Blocktype = TextBlock | InputBlock | CheckboxBlock | RadioBlock;
