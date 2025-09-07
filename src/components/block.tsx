@@ -36,15 +36,16 @@ export const Block = ({ block, key }: { block: Blocktype, key: number }) => {
             )
         case "checkbox":
             return (
-                <div key={key} id={block.id} className=" flex flex-col">
+                <div key={key} id={block.id} className=" flex flex-col px-1">
                     {block.options.map((option, idx) => (
-                        <div key={idx} className='flex gap-2'>
-                            <div className='rounded-xl size-4 border border-neutral-400'></div>
+                        <div key={idx} className='flex items-center gap-2'>
+                            <div className='rounded-[3px]  h-[17px] w-[18px] bg-white  shadow-checkbox'></div>
                             <div
                                 data-placeholder="Input"
+                                contentEditable="true"
                                 className={cn("[&:empty]:before:content-[attr(data-placeholder)]  [&:empty]:before:text-neutral-400",
-                                    "w-full h-full text-sm  focus:outline-none px-4 py-2 font-normal"
-                                )} ></div>
+                                    "w-full h-full text-sm  focus:outline-none py-2 font-normal"
+                                )} >{option}</div>
                         </div>
                     ))}
                 </div>
