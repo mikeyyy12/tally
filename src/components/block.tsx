@@ -26,11 +26,20 @@ export const Block = ({ block, }: { block: Blocktype }) => {
             )
         case "input":
             return (
-                <div id={block.id} className='w-60  shadow-checkbox  rounded-lg  text-sm '>
+                <div id={block.id} className='w-60  shadow-checkbox  rounded-lg px-4 py-2 text-sm '>
                     <div
+
                         data-placeholder="Input"
-                        className={cn("[&:empty]:before:content-[attr(data-placeholder)]  [&:empty]:before:text-neutral-400 ",
-                            "w-full h-full text-sm  focus:outline-none px-4 py-2 font-normal"
+                        contentEditable
+                        onKeyDown={(e) => {
+                            if (e.key == "Enter") {
+                                e.preventDefault();
+                            }
+                        }}
+
+                        className={cn("[&:empty]:before:content-[attr(data-placeholder)] [&:empty]:before:text-neutral-400 ",
+                            "w-full h-full text-sm tracking-wide focus:outline-none  font-normal text-neutral-400",
+                            "whitespace-nowrap overflow-x-auto overflow-y-hidden scrollbar-hide"
                         )} ></div>
                 </div>
             )
