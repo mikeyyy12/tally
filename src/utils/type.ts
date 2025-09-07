@@ -11,7 +11,7 @@ interface TextBlock extends BlockBase {
 interface InputBlock extends BlockBase {
   type: "input";
   label: string;
-  required: boolean;
+  required?: boolean;
 }
 
 interface CheckboxBlock extends BlockBase {
@@ -26,4 +26,4 @@ interface RadioBlock extends BlockBase {
   options: string[];
 }
 
-type Block = TextBlock | InputBlock | CheckboxBlock | RadioBlock;
+export type Blocktype = TextBlock | InputBlock | CheckboxBlock | RadioBlock;

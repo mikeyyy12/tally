@@ -1,4 +1,5 @@
 import { cn } from '@/utils/cn';
+import { Blocktype } from '@/utils/type';
 import React from 'react'
 
 
@@ -8,25 +9,44 @@ import React from 'react'
 //   { "type": "insertOption", "blockId": "b2", "optionId": "o1", "label": "Red" }
 // ]
 
-export const Block = ({ block }: { block: Block }) => {
+export const Block = ({ block, key }: { block: Blocktype, key: number }) => {
 
     switch (block.type) {
         case "text":
             return (
-                <div contentEditable={'true'}
-                    data-placeholder="Input"
+                <div key={key} id={block.id} contentEditable={'true'}
+
                     onInput={(e) => {
                         const value = e.currentTarget.textContent;
                         console.log(value);
                     }}
-                    className={cn("[&:empty]:before:content-[attr(data-placeholder)] [&:empty]:before:text-neutral-400",
-                        "text-xl font-semibold tracking-tight p-2"
+                    className={cn(
+                        "text-xl focus:outline-none font-semibold tracking-tight p-2"
                     )}></div>
             )
         case "input":
             return (
-                <div className='w-full h-20 border border-neutral-400 text-sm '>
-                    <div className='w-full h-full ' ></div>
+                <div key={key} id={block.id} className='w-60  border-2  rounded-lg border-neutral-400 text-sm '>
+                    <div
+                        data-placeholder="Input"
+                        className={cn("[&:empty]:before:content-[attr(data-placeholder)]  [&:empty]:before:text-neutral-400",
+                            "w-full h-full text-sm  focus:outline-none px-4 py-2 font-normal"
+                        )} ></div>
+                </div>
+            )
+        case "checkbox":
+            return (
+                <div key={key} id={block.id} className=" flex flex-col">
+                    {block.options.map((option, idx) => (
+                        <div key={idx} className='flex gap-2'>
+                            <div className='rounded-xl size-4 border border-neutral-400'></div>
+                            <div
+                                data-placeholder="Input"
+                                className={cn("[&:empty]:before:content-[attr(data-placeholder)]  [&:empty]:before:text-neutral-400",
+                                    "w-full h-full text-sm  focus:outline-none px-4 py-2 font-normal"
+                                )} ></div>
+                        </div>
+                    ))}
                 </div>
             )
     }

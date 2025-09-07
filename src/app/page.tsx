@@ -1,13 +1,7 @@
 "use client"
 
 import { EditorPage } from "@/components/editor-page";
-import { useState } from "react";
 
-
-
-const intiblocks: Block[] = [
-  { id: "shub1", type: "text", content: "this is the text you need t orender" },
-]
 
 const randomGenerator = () => {
   const number = Math.floor(Math.random() * 1000)
@@ -15,10 +9,9 @@ const randomGenerator = () => {
 }
 
 export default function Home() {
-  const [blocks, setBlocks] = useState<Block[]>(intiblocks)
-  const [isOpen, setIsOpen] = useState(false)
+
   return (
-    <div className="relative">
+    <div className="relative min-h-screen max-w-4xl mx-auto mt-12 border-2 border-neutral-300 shadow-lg p-8 rounded-xl">
       <EditorPage />
 
     </div >
