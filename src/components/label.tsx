@@ -1,6 +1,7 @@
+"use client"
 import { cn } from "@/utils/cn";
 import { Blocktype } from "@/utils/type";
-import React from "react";
+import React, { useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 
 const LableElements = [
@@ -11,26 +12,29 @@ const LableElements = [
 ];
 
 export const Label = ({
-    onClick,
+    coords,
     setBlocks,
+    close
 }: {
-    onClick: () => void;
+    coords: { x: number, y: number },
+    close: () => void,
     setBlocks: React.Dispatch<React.SetStateAction<Blocktype[]>>;
 }) => {
+
+
+
     return (
         <div className="absolute inset-0 flex items-center justify-center">
-            {/* overlay */}
-            <div
-                className="absolute inset-0 w-full h-full bg-neutral-800/50"
-                onClick={onClick}
-            ></div>
-
-            {/* modal */}
-            <div
-                className="absolute inset-0 m-auto w-72 h-fit p-10 flex flex-col gap-4 bg-white rounded-xl shadow-checkbox z-10"
+            <div className="absolute h-full w-full" onClick={close}></div>
+            {coords && <div
+                className="absolute m-auto w-72 h-fit p-10 flex flex-col gap-4 bg-white rounded-xl shadow-checkbox z-10"
+                style={{
+                    top: coords.y + window.scrollY,
+                    left: coords.x + window.scrollX,
+                    position: "absolute",
+                }}
                 onClick={(e) => {
                     e.stopPropagation()
-                    onClick()
                 }}
             >
                 {LableElements.map((label) => (
@@ -137,7 +141,7 @@ export const Label = ({
                         )}
                     </div>
                 ))}
-            </div>
+            </div>}
         </div>
     );
 };

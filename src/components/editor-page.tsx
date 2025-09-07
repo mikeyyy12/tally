@@ -14,14 +14,53 @@ export const EditorPage = () => {
     { type: "input", id: uuidv4(), label: "What's your name?", required: true },
     { type: "checkbox", id: uuidv4(), label: "What's your name?", options: ["true", "false"] },
     { type: "radio", id: uuidv4(), label: "Are you above 18", options: [{ letter: "A", value: "true" }, { letter: "B", value: "false", }] }
+
   ])
+
+  const [coords, setCoords] = useState<{ x: number, y: number }>({ x: 0, y: 0 });
+
+  function getCaretCoordinates() {
+    const selection = window.getSelection();
+    if (!selection || selection.rangeCount === 0) return null;
+
+    const range = selection.getRangeAt(0).cloneRange();
+    range.collapse(true);
+
+    const rect = range.getBoundingClientRect();
+    if (!rect) return null;
+
+    return {
+      x: rect.left,
+      y: rect.top,
+      height: rect.height,
+    };
+  }
+  const openModal = () => {
+    console.log('open model triggerd')
+    setIsOpen(true)
+    const caret = getCaretCoordinates();
+    if (caret) {
+      setCoords({
+        x: caret.x,
+        y: caret.y - 240
+      });
+
+    }
+  }
 
   useEffect(() => {
     console.log(blocks)
   }, [blocks])
 
   return (
-    <div className="flex flex-col gap-4  ">
+    <div
+      onKeyDown={(e: React.KeyboardEvent<HTMLDivElement>) => {
+        if (e.key == "/") {
+          openModal();
+          console.log("/ is pressed")
+        }
+      }}
+      className="flex flex-col gap-4  ">
       <div >
         <input className="text-3xl font-bold text-neutral-800 outline-none p-2" placeholder="Form title" type="text" onChange={(e: ChangeEvent<HTMLInputElement>) => setFormTitle(e.target.value)} value={formTitle} />
       </div>
@@ -31,13 +70,12 @@ export const EditorPage = () => {
         ))}
       </div>
       <div className="px-4 py-2 bg-sky-500 text-white w-fit rounded-lg cursor-pointer"
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={openModal}
       >Add</div>
-      {isOpen && <Label onClick={() => {
-        setIsOpen(false)
-        console.log("closing")
-      }} setBlocks={setBlocks} />}
-    </div>
+      {
+        isOpen && <Label close={() => setIsOpen(false)} coords={coords} setBlocks={setBlocks} />
+      }
+    </div >
   )
 }
 
