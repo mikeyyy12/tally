@@ -27,7 +27,7 @@ export const Label = ({
         <div className="absolute inset-0 flex items-center justify-center">
             <div className="absolute h-full w-full" onClick={close}></div>
             {coords && <div
-                className="absolute m-auto w-72 h-fit p-10 flex flex-col gap-4 bg-white rounded-xl shadow-checkbox z-10"
+                className="absolute m-auto w-fit h-fit py-4 px-4 flex flex-col gap-4 bg-white rounded-xl shadow-checkbox z-10"
                 style={{
                     top: coords.y + window.scrollY,
                     left: coords.x + window.scrollX,
