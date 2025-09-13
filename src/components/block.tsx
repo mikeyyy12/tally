@@ -20,6 +20,36 @@ export const Block = ({ block, }: { block: Blocktype }) => {
         ]
         setBlocks(newBlocks)
     }
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+
+        console.log(e.key)
+        if (e.key == "Enter") {
+            e.preventDefault()
+            handleEnter({ id: block.id })
+        }
+        else if (e.key == "Backspace") {
+            handleBackspace({ e, id: block.id })
+        }
+    }
+
+    const handleBackspace = ({ e, id }: { e: React.KeyboardEvent<HTMLDivElement>, id: string }) => {
+        const currentDiv = e.currentTarget;
+        const isEmpty = !currentDiv.textContent || currentDiv.textContent === "";
+        if (isEmpty) {
+            e.preventDefault()
+            const index = blocks.findIndex((b) => b.id == id)
+            const newBlocks = [
+                ...blocks.slice(0, index),
+                ...blocks.slice(index + 1)
+            ]
+            setBlocks(newBlocks)
+            if (index > 0) {
+                const prevId = blocks[index - 1].id;
+                const prevDiv = document.getElementById(prevId);
+                prevDiv?.focus();
+            }
+        }
+    }
     switch (block.type) {
         case "text":
             return (
@@ -37,17 +67,15 @@ export const Block = ({ block, }: { block: Blocktype }) => {
                     )}>{block.content as string}</div>
             )
         case "input":
+
             return (
-                <div id={block.id} className='w-60  shadow-checkbox  rounded-lg px-4 py-2 text-sm '>
+                <div id={block.id}
+
+                    className='w-60  shadow-checkbox  rounded-lg px-4 py-2 text-sm '>
                     <div
                         data-placeholder="Input"
                         contentEditable
-                        onKeyDown={(e) => {
-                            if (e.key == "Enter") {
-                                e.preventDefault();
-                            }
-                        }}
-
+                        onKeyDown={(e) => handleKeyDown(e)}
                         className={cn("[&:empty]:before:content-[attr(data-placeholder)] [&:empty]:before:text-neutral-400 ",
                             "w-full h-full text-sm tracking-wide focus:outline-none  font-normal text-neutral-400",
                             "whitespace-nowrap overflow-x-auto overflow-y-hidden scrollbar-hide"
@@ -78,14 +106,7 @@ export const Block = ({ block, }: { block: Blocktype }) => {
             )
         case "paragraph":
             return (<div id={block.id} contentEditable={'true'}
-                onKeyDown={(e: React.KeyboardEvent<HTMLDivElement>) => {
-                    console.log(e.key)
-                    if (e.key == "Enter") {
-                        e.preventDefault()
-                        handleEnter({ id: block.id })
-                    }
-                }}
-
+                onKeyDown={(e) => handleKeyDown(e)}
                 data-placeholder={block.label}
                 onInput={(e) => {
                     const value = e.currentTarget.textContent;
