@@ -51,13 +51,27 @@ export const Label = ({
                                 onClick={() => {
                                     console.log('clicked')
                                     const index = blocks.findIndex((b) => b.id == currnetId)
-                                    const newBlock = { type: "text" as const, id: uuidv4(), label: "Heading 1" }
-                                    const newBlocks = [...blocks.slice(0, index + 1),
-                                        newBlock,
-                                    ...blocks.slice(index + 1)
-                                    ]
-                                    console.log("the og block", blocks)
-                                    console.log("the new blocks:", newBlocks)
+                                    const currentDiv = document.getElementById(currnetId);
+                                    const rawText = currentDiv?.textContent ?? "";
+                                    const cleaned = rawText.trim();
+
+                                    const isEmpty = cleaned === "" || cleaned === "/"
+                                    let newBlock = { type: "text" as const, id: uuidv4(), label: "Heading 1", content: "" };
+
+                                    let newBlocks;
+                                    if (isEmpty) {
+                                        newBlocks = [...blocks.slice(0, index),
+                                            newBlock,
+                                        ...blocks.slice(index + 1)
+                                        ]
+                                    } else {
+                                        newBlocks = [...blocks.slice(0, index + 1),
+                                            newBlock,
+                                        ...blocks.slice(index + 1)
+                                        ]
+                                    }
+
+
                                     setBlocks(newBlocks);
                                     setIsOpen(false)
                                 }

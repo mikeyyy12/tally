@@ -42,8 +42,6 @@ export const Block = ({ block, }: { block: Blocktype }) => {
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
 
-        console.log(e.key)
-
         if (e.key == "Enter") {
             e.preventDefault()
             handleEnter({ id: block.id })
@@ -70,11 +68,12 @@ export const Block = ({ block, }: { block: Blocktype }) => {
     const handleInput = (e: React.KeyboardEvent<HTMLDivElement>) => {
 
         const value = e.currentTarget.textContent || "";
+        console.log('value', value)
         if (value === "") {
             e.currentTarget.textContent = "";
         }
+
         if (!value.includes("/")) {
-            console.log("closing this shit")
             setIsOpen(false);
         }
     }
@@ -143,7 +142,7 @@ export const Block = ({ block, }: { block: Blocktype }) => {
                         <div key={idx}
                             onKeyDown={(e: React.KeyboardEvent<HTMLDivElement>) => {
                                 e.preventDefault();
-                                console.log(e.key)
+
                             }}
                             className='flex items-center gap-2'>
                             <div className='rounded-[3px]  h-[17px] w-[18px] bg-white  shadow-checkbox'></div>
