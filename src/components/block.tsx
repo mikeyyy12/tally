@@ -28,12 +28,18 @@ export const Block = ({ block, }: { block: Blocktype }) => {
         console.log("running")
         if (focusId) {
             console.log('setting focus')
-            const div = document.getElementById(focusId)
+            let div = document.getElementById(focusId)
+            if (div && !div.isContentEditable) {
+                const editable = div.querySelector('[contenteditable="true"]') as HTMLElement;
+                if (editable) div = editable;
+                console.log("this is div->", div)
+            }
+
             if (div) {
                 div.focus()
                 const range = document.createRange()
                 range.selectNodeContents(div)
-                range.collapse(true)
+                range.collapse(false)
                 const sel = window.getSelection()
                 sel?.removeAllRanges()
                 sel?.addRange(range)
