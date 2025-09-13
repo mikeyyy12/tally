@@ -14,7 +14,6 @@ export const EditorPage = () => {
     { type: "input", id: uuidv4(), label: "What's your name?", required: true },
     { type: "checkbox", id: uuidv4(), label: "What's your name?", options: ["true", "false"] },
     { type: "radio", id: uuidv4(), label: "Are you above 18", options: [{ letter: "A", value: "true" }, { letter: "B", value: "false", }] }
-
   ])
 
   const [coords, setCoords] = useState<{ x: number, y: number }>({ x: 0, y: 0 });
@@ -35,6 +34,8 @@ export const EditorPage = () => {
       height: rect.height,
     };
   }
+
+
   const openModal = () => {
     console.log('open model triggerd')
     setIsOpen(true)
@@ -47,6 +48,9 @@ export const EditorPage = () => {
 
     }
   }
+  const handleEnter = () => {
+    const newBlock = { type: "paragraph", id: uuidv4(), label: "Type '/' to intsert block" }
+  }
 
   useEffect(() => {
     console.log(blocks)
@@ -55,9 +59,16 @@ export const EditorPage = () => {
   return (
     <div
       onKeyDown={(e: React.KeyboardEvent<HTMLDivElement>) => {
+
         if (e.key == "/") {
           openModal();
           console.log("/ is pressed")
+        } else if (e.key == "Backspace") {
+          console.log("backspace pressed")
+          setIsOpen(false)
+        } else if (e.key == "Enter") {
+          console.log("its enter")
+          handleEnter()
         }
       }}
       className="flex flex-col gap-4  ">
