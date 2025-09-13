@@ -46,16 +46,7 @@ export const EditorPage = () => {
 
     }
   }
-  const handleEnter = ({ id }: { id: string }) => {
-    const newBlock = { type: "paragraph" as const, id: uuidv4(), label: "Type '/' to intsert block" }
-    const index = blocks.findIndex(b => b.id === id);
-    const newBlocks = [
-      ...blocks.slice(0, index + 1),
-      newBlock,
-      ...blocks.slice(index + 1)
-    ]
-    setBlocks(newBlocks)
-  }
+
 
   useEffect(() => {
     console.log(blocks)
@@ -68,8 +59,10 @@ export const EditorPage = () => {
           openModal();
           console.log("/ is pressed")
         } else if (e.key == "Backspace") {
-          console.log("backspace pressed")
-          setIsOpen(false)
+          if (isOpen) {
+            console.log("backspace pressed")
+            setIsOpen(false)
+          }
         }
       }}
       className="flex flex-col gap-4  ">

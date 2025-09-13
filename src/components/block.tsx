@@ -1,11 +1,13 @@
 import { BlocksContext } from '@/context/context';
 import { cn } from '@/utils/cn';
 import { Blocktype } from '@/utils/type';
-import React, { useContext, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import { v4 as uuidv4 } from 'uuid';
 
 
 export const Block = ({ block, }: { block: Blocktype }) => {
+    const [focusId, setFocusId] = useState<string | null>(null)
+
     const context = useContext(BlocksContext)
     if (!context) throw new Error("Block context not found")
     const { blocks, setBlocks } = context;
@@ -19,7 +21,25 @@ export const Block = ({ block, }: { block: Blocktype }) => {
             ...blocks.slice(index + 1)
         ]
         setBlocks(newBlocks)
+        setFocusId(newBlock.id)
     }
+
+    useEffect(() => {
+        if (focusId) {
+            const div = document.getElementById(focusId)
+            if (div) {
+                div.focus()
+                const range = document.createRange()
+                range.selectNodeContents(div)
+                range.collapse(true)
+                const sel = window.getSelection()
+                sel?.removeAllRanges()
+                sel?.addRange(range)
+                setFocusId(null)
+            }
+        }
+    }, [focusId])
+
     const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
 
         console.log(e.key)
@@ -33,9 +53,11 @@ export const Block = ({ block, }: { block: Blocktype }) => {
     }
 
     const handleBackspace = ({ e, id }: { e: React.KeyboardEvent<HTMLDivElement>, id: string }) => {
+        console.log("presed it fu")
         const currentDiv = e.currentTarget;
         const isEmpty = !currentDiv.textContent || currentDiv.textContent === "";
         if (isEmpty) {
+            console.log('is empt')
             e.preventDefault()
             const index = blocks.findIndex((b) => b.id == id)
             const newBlocks = [
@@ -46,8 +68,21 @@ export const Block = ({ block, }: { block: Blocktype }) => {
             if (index > 0) {
                 const prevId = blocks[index - 1].id;
                 const prevDiv = document.getElementById(prevId);
-                prevDiv?.focus();
+
+                if (prevDiv) {
+                    prevDiv.focus();
+
+                    const range = document.createRange();
+                    range.selectNodeContents(prevDiv);
+                    range.collapse(false);
+
+                    const sel = window.getSelection();
+
+                    sel?.addRange(range);
+
+                }
             }
+
         }
     }
     switch (block.type) {

@@ -16,6 +16,7 @@ interface TextBlock extends BlockBase {
 interface InputBlock extends BlockBase {
   type: "input";
   label: string;
+   content?:string
   required?: boolean;
 }
 
@@ -28,17 +29,20 @@ interface AreaBlock extends BlockBase{
 interface CheckboxBlock extends BlockBase {
   type: "checkbox";
   label: string;
+   content?:string
   options: string[];
 }
 
 interface RadioBlock extends BlockBase {
   type: "radio";
+   content?:string
   label: string;
   options: RadioOption[];
 }
 
 interface Paragraph extends BlockBase{
   type:"paragraph",
+  content?:string
   label:string;
 }
 
