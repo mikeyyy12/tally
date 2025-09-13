@@ -13,7 +13,7 @@ export const Block = ({ block, }: { block: Blocktype }) => {
     const { blocks, setBlocks } = context;
 
     const handleEnter = ({ id }: { id: string }) => {
-        const newBlock = { type: "paragraph" as const, id: uuidv4(), label: "Type '/' to intsert block" }
+        const newBlock = { type: "paragraph" as const, id: uuidv4(), label: "Type '/' to insert block" }
         const index = blocks.findIndex(b => b.id === id);
         const newBlocks = [
             ...blocks.slice(0, index + 1),
@@ -71,15 +71,12 @@ export const Block = ({ block, }: { block: Blocktype }) => {
 
                 if (prevDiv) {
                     prevDiv.focus();
-
                     const range = document.createRange();
                     range.selectNodeContents(prevDiv);
                     range.collapse(false);
-
                     const sel = window.getSelection();
-
+                    sel?.removeAllRanges();
                     sel?.addRange(range);
-
                 }
             }
 
@@ -93,7 +90,11 @@ export const Block = ({ block, }: { block: Blocktype }) => {
                         console.log(e.key)
                     }}
                     onInput={(e) => {
-                        const value = e.currentTarget.textContent;
+                        const value = e.currentTarget.textContent || "";
+                        if (value.trim() === "") {
+                            e.currentTarget.textContent = "";
+                        }
+
                         console.log(value);
                     }}
                     suppressContentEditableWarning
@@ -144,7 +145,11 @@ export const Block = ({ block, }: { block: Blocktype }) => {
                 onKeyDown={(e) => handleKeyDown(e)}
                 data-placeholder={block.label}
                 onInput={(e) => {
-                    const value = e.currentTarget.textContent;
+                    const value = e.currentTarget.textContent || "";
+                    if (value.trim() === "") {
+                        e.currentTarget.textContent = "";
+                    }
+
                     console.log(value);
                 }}
                 suppressContentEditableWarning
