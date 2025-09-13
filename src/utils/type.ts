@@ -37,8 +37,8 @@ interface CheckboxBlock extends BlockBase {
 interface RadioBlock extends BlockBase {
   type: "radio";
    content?:string
-  label: string;
-  options: RadioOption[];
+  label?: string;
+  options?: RadioOption[];
 }
 
 interface Paragraph extends BlockBase{

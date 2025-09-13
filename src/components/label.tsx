@@ -30,6 +30,46 @@ export const Label = ({
     const { blocks, setIsOpen, currnetId, setFocusId, focusId } = context;
 
 
+    const handleClick = ({ type }: { type: string }) => {
+
+        console.log('clicked')
+        const index = blocks.findIndex((b) => b.id == currnetId)
+        const currentDiv = document.getElementById(currnetId);
+        const rawText = currentDiv?.textContent ?? "";
+        const cleaned = rawText.trim();
+
+        const isEmpty = cleaned === "" || cleaned === "/"
+        let newBlock
+        if (type == "text") {
+            newBlock = { type: "text" as const, id: uuidv4(), label: "Heading 1", content: "" };
+        } else if (type == "input") {
+            newBlock = { type: "input" as const, id: uuidv4(), label: "Input box", content: "" }
+        } else if (type == "checkbox") {
+            newBlock = { type: "checkbox" as const, id: uuidv4(), label: "checkbox", content: "", options: ["true", "fuck"] }
+        } else if (type == "radio") {
+            newBlock = { type: "radio" as const, id: uuidv4(), options: [{ letter: "", value: "" }] }
+        }
+        if (!newBlock) return
+
+        let newBlocks;
+        if (isEmpty) {
+            newBlocks = [...blocks.slice(0, index),
+                newBlock,
+            ...blocks.slice(index + 1)
+            ]
+        } else {
+            newBlocks = [...blocks.slice(0, index + 1),
+                newBlock,
+            ...blocks.slice(index + 1)
+            ]
+        }
+
+        setBlocks(newBlocks);
+        setIsOpen(false)
+        console.log("new block id:", newBlock.id)
+        setFocusId(newBlock.id)
+
+    }
     return (
         <div className="absolute inset-0 flex items-center justify-center">
             <div className="absolute h-full w-full" onClick={close}></div>
@@ -50,51 +90,17 @@ export const Label = ({
                             <div
                                 className="text-2xl font-bold text-center"
                                 onClick={() => {
-                                    console.log('clicked')
-                                    const index = blocks.findIndex((b) => b.id == currnetId)
-                                    const currentDiv = document.getElementById(currnetId);
-                                    const rawText = currentDiv?.textContent ?? "";
-                                    const cleaned = rawText.trim();
-
-                                    const isEmpty = cleaned === "" || cleaned === "/"
-                                    let newBlock = { type: "text" as const, id: uuidv4(), label: "Heading 1", content: "" };
-
-                                    let newBlocks;
-                                    if (isEmpty) {
-                                        newBlocks = [...blocks.slice(0, index),
-                                            newBlock,
-                                        ...blocks.slice(index + 1)
-                                        ]
-                                    } else {
-                                        newBlocks = [...blocks.slice(0, index + 1),
-                                            newBlock,
-                                        ...blocks.slice(index + 1)
-                                        ]
-                                    }
-
-                                    setBlocks(newBlocks);
-                                    setIsOpen(false)
-                                    console.log("new block id:", newBlock.id)
-                                    setFocusId(newBlock.id)
-                                }
-                                }
+                                    handleClick({ type: label.type })
+                                }}
                             >
                                 Heading
                             </div>
                         ) : label.type === "input" ? (
                             <div
                                 className="flex items-center gap-1"
-                                onClick={() =>
-                                    setBlocks((prev) => [
-                                        ...prev,
-                                        {
-                                            type: "input",
-                                            id: uuidv4(),
-                                            label: "New input",
-                                            required: false,
-                                        },
-                                    ])
-                                }
+                                onClick={() => {
+                                    handleClick({ type: label.type })
+                                }}
                             >
                                 <div
                                     data-placeholder="Input"
@@ -108,17 +114,9 @@ export const Label = ({
                         ) : label.type === "checkbox" ? (
                             <div
                                 className="flex items-center gap-1"
-                                onClick={() =>
-                                    setBlocks((prev) => [
-                                        ...prev,
-                                        {
-                                            type: "checkbox",
-                                            id: uuidv4(),
-                                            label: "New checkbox",
-                                            options: ["Option "],
-                                        },
-                                    ])
-                                }
+                                onClick={() => {
+                                    handleClick({ type: label.type })
+                                }}
                             >
                                 <div className="size-2 rounded-xs shadow-checkbox"></div>
                                 <p>Checkbox</p>
@@ -132,13 +130,13 @@ export const Label = ({
 
                                             return prev.map((block, idx) => {
                                                 if (idx === prev.length - 1 && block.type == "radio") {
-                                                    const lastOption = block.options[block.options.length - 1];
+                                                    const lastOption = block.options![block.options!.length - 1];
                                                     const nextLetter = String.fromCharCode(lastOption.letter.charCodeAt(0) + 1);
 
                                                     return {
                                                         ...block,
                                                         options: [
-                                                            ...block.options,
+                                                            ...block.options!,
                                                             { letter: nextLetter, value: `Option ${nextLetter}` },
                                                         ],
                                                     };
