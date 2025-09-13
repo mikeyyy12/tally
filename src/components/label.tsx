@@ -35,6 +35,8 @@ export const Label = ({
         console.log('clicked')
         const index = blocks.findIndex((b) => b.id == currnetId)
         const currentDiv = document.getElementById(currnetId);
+        if (!currentDiv) return
+
         const rawText = currentDiv?.textContent ?? "";
         const cleaned = rawText.trim();
 
@@ -53,6 +55,7 @@ export const Label = ({
 
         let newBlocks;
         if (isEmpty) {
+            currentDiv.textContent = "";
             newBlocks = [...blocks.slice(0, index),
                 newBlock,
             ...blocks.slice(index + 1)

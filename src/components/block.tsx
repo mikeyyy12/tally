@@ -125,8 +125,6 @@ export const Block = ({ block, }: { block: Blocktype }) => {
 
             return (
 
-
-
                 <div
                     id={block.id}
                     data-placeholder={block.label}
