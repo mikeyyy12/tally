@@ -10,7 +10,7 @@ export const Block = ({ block, }: { block: Blocktype }) => {
 
     const context = useContext(BlocksContext)
     if (!context) throw new Error("Block context not found")
-    const { blocks, setBlocks } = context;
+    const { blocks, setBlocks, setIsOpen } = context;
 
     const handleEnter = ({ id }: { id: string }) => {
         const newBlock = { type: "paragraph" as const, id: uuidv4(), label: "Type '/' to insert block" }
@@ -43,6 +43,7 @@ export const Block = ({ block, }: { block: Blocktype }) => {
     const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
 
         console.log(e.key)
+
         if (e.key == "Enter") {
             e.preventDefault()
             handleEnter({ id: block.id })
@@ -50,7 +51,19 @@ export const Block = ({ block, }: { block: Blocktype }) => {
         else if (e.key == "Backspace") {
             handleBackspace({ e, id: block.id })
         }
+        else if (e.key == "/") {
+
+            setIsOpen(true)
+        }
     }
+    const handleInput = (e: React.FormEvent<HTMLDivElement>) => {
+        const value = e.currentTarget.textContent || "";
+
+        // If user deletes "/", close modal
+        if (!value.includes("/")) {
+            setIsOpen(false);
+        }
+    };
 
     const handleBackspace = ({ e, id }: { e: React.KeyboardEvent<HTMLDivElement>, id: string }) => {
         console.log("presed it fu")
@@ -143,13 +156,16 @@ export const Block = ({ block, }: { block: Blocktype }) => {
         case "paragraph":
             return (<div id={block.id} contentEditable={'true'}
                 onKeyDown={(e) => handleKeyDown(e)}
+
                 data-placeholder={block.label}
                 onInput={(e) => {
                     const value = e.currentTarget.textContent || "";
-                    if (value.trim() === "") {
+                    if (value === "") {
                         e.currentTarget.textContent = "";
                     }
-
+                    if (!value.includes("/")) {
+                        setIsOpen(false);
+                    }
                     console.log(value);
                 }}
                 suppressContentEditableWarning

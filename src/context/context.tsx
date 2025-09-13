@@ -6,6 +6,8 @@ import { v4 as uuidv4 } from 'uuid';
 interface BlocksContextType {
   blocks: Blocktype[];
   setBlocks: React.Dispatch<React.SetStateAction<Blocktype[]>>;
+  isOpen: boolean;
+  setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 export const BlocksContext = createContext<BlocksContextType | undefined>(undefined)
@@ -19,8 +21,10 @@ export const BlocksProvider = ({ children }: { children: React.ReactNode }) => {
     { type: "radio", id: uuidv4(), label: "Are you above 18", options: [{ letter: "A", value: "true" }, { letter: "B", value: "false" }] }
   ]);
 
+  const [isOpen, setIsOpen] = useState(false)
+
   return (
-    <BlocksContext.Provider value={{ blocks, setBlocks }}>
+    <BlocksContext.Provider value={{ blocks, setBlocks, isOpen, setIsOpen }}>
       {children}
     </BlocksContext.Provider>
   );

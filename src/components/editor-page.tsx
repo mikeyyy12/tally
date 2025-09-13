@@ -12,9 +12,9 @@ export const EditorPage = () => {
   const context = useContext(BlocksContext);
   if (!context) throw new Error("BlocksContext must be used within a BlocksProvider");
   const [formTitle, setFormTitle] = useState("")
-  const [isOpen, setIsOpen] = useState(false)
+
   const [coords, setCoords] = useState<{ x: number, y: number }>({ x: 0, y: 0 });
-  const { blocks, setBlocks } = context;
+  const { blocks, setBlocks, isOpen, setIsOpen } = context;
 
   function getCaretCoordinates() {
     const selection = window.getSelection();
@@ -49,27 +49,21 @@ export const EditorPage = () => {
 
 
   useEffect(() => {
-    console.log(blocks)
-  }, [blocks])
+    if (isOpen) {
+      openModal()
+    }
+  }, [isOpen])
 
   return (
     <div
-      onKeyDown={(e: React.KeyboardEvent<HTMLDivElement>) => {
-        if (e.key == "/") {
-          openModal();
-          console.log("/ is pressed")
-        } else if (e.key == "Backspace") {
-          if (isOpen) {
-            console.log("backspace pressed")
-            setIsOpen(false)
-          }
-        }
-      }}
+
+
       className="flex flex-col gap-4  ">
       <div >
         <input className="text-3xl font-bold text-neutral-800 outline-none p-2" placeholder="Form title" type="text" onChange={(e: ChangeEvent<HTMLInputElement>) => setFormTitle(e.target.value)} value={formTitle} />
       </div>
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-2"
+      >
         {blocks.map((block, idx) => (
           <Block key={idx} block={block} />
         ))}
