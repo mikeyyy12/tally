@@ -42,7 +42,7 @@ export const Block = ({ block, }: { block: Blocktype }) => {
         }
     }, [focusId])
 
-    const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    const handleKeyDown = ({ e, type }: { e: React.KeyboardEvent<HTMLDivElement>, type: string }) => {
 
         if (e.key == "Enter") {
             e.preventDefault()
@@ -51,7 +51,7 @@ export const Block = ({ block, }: { block: Blocktype }) => {
         else if (e.key == "Backspace") {
             handleBackspace({ e, id: block.id })
         }
-        else if (e.key === "/") {
+        else if (e.key === "/" && type == "paragraph") {
             setCurrentId(block.id)
             requestAnimationFrame(() => {
                 const selection = window.getSelection();
@@ -113,7 +113,7 @@ export const Block = ({ block, }: { block: Blocktype }) => {
         case "text":
             return (
                 <div id={block.id} contentEditable={'true'}
-                    onKeyDown={(e) => handleKeyDown(e)}
+                    onKeyDown={(e) => handleKeyDown({ e, type: block.type })}
                     data-placeholder={block.label}
                     onInput={handleInput}
                     suppressContentEditableWarning
@@ -130,7 +130,7 @@ export const Block = ({ block, }: { block: Blocktype }) => {
                     <div
                         data-placeholder="Input"
                         contentEditable
-                        onKeyDown={(e) => handleKeyDown(e)}
+                        onKeyDown={(e) => handleKeyDown({ e, type: block.type })}
                         className={cn("[&:empty]:before:content-[attr(data-placeholder)] [&:empty]:before:text-neutral-400 ",
                             "w-full h-full text-sm tracking-wide focus:outline-none  font-normal text-neutral-400",
                             "whitespace-nowrap overflow-x-auto overflow-y-hidden scrollbar-hide"
@@ -142,10 +142,7 @@ export const Block = ({ block, }: { block: Blocktype }) => {
                 <div id={block.id} className=" flex flex-col px-1">
                     {block.options.map((option, idx) => (
                         <div key={idx}
-                            onKeyDown={(e: React.KeyboardEvent<HTMLDivElement>) => {
-                                e.preventDefault();
-
-                            }}
+                            onKeyDown={(e) => handleKeyDown({ e, type: block.type })}
                             className='flex items-center gap-2'>
                             <div className='rounded-[3px]  h-[17px] w-[18px] bg-white  shadow-checkbox'></div>
                             <div
@@ -161,8 +158,7 @@ export const Block = ({ block, }: { block: Blocktype }) => {
             )
         case "paragraph":
             return (<div id={block.id} contentEditable={'true'}
-                onKeyDown={(e) => handleKeyDown(e)}
-
+                onKeyDown={(e) => handleKeyDown({ e, type: block.type })}
                 data-placeholder={block.label}
                 onInput={handleInput}
                 suppressContentEditableWarning
