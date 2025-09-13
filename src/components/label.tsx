@@ -2,7 +2,7 @@
 import { BlocksContext } from "@/context/context";
 import { cn } from "@/utils/cn";
 import { Blocktype } from "@/utils/type";
-import React, { useContext, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 
 const LableElements = [
@@ -27,7 +27,8 @@ export const Label = ({
     const context = useContext(BlocksContext)
     if (!context) throw new Error("Context not found")
 
-    const { blocks, setIsOpen, currnetId } = context;
+    const { blocks, setIsOpen, currnetId, setFocusId, focusId } = context;
+
 
     return (
         <div className="absolute inset-0 flex items-center justify-center">
@@ -71,9 +72,10 @@ export const Label = ({
                                         ]
                                     }
 
-
                                     setBlocks(newBlocks);
                                     setIsOpen(false)
+                                    console.log("new block id:", newBlock.id)
+                                    setFocusId(newBlock.id)
                                 }
                                 }
                             >

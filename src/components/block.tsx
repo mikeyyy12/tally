@@ -6,11 +6,11 @@ import { v4 as uuidv4 } from 'uuid';
 
 
 export const Block = ({ block, }: { block: Blocktype }) => {
-    const [focusId, setFocusId] = useState<string | null>(null)
+
 
     const context = useContext(BlocksContext)
     if (!context) throw new Error("Block context not found")
-    const { blocks, setBlocks, setIsOpen, setCurrentId } = context;
+    const { blocks, setBlocks, setIsOpen, setCurrentId, focusId, setFocusId } = context;
 
     const handleEnter = ({ id }: { id: string }) => {
         const newBlock = { type: "paragraph" as const, id: uuidv4(), label: "Type '/' to insert block" }
@@ -25,7 +25,9 @@ export const Block = ({ block, }: { block: Blocktype }) => {
     }
 
     useEffect(() => {
+        console.log("running")
         if (focusId) {
+            console.log('setting focus')
             const div = document.getElementById(focusId)
             if (div) {
                 div.focus()
@@ -78,7 +80,7 @@ export const Block = ({ block, }: { block: Blocktype }) => {
         }
     }
     const handleBackspace = ({ e, id }: { e: React.KeyboardEvent<HTMLDivElement>, id: string }) => {
-        console.log("presed it fu")
+
         const currentDiv = e.currentTarget;
         const isEmpty = !currentDiv.textContent || currentDiv.textContent === "";
         if (isEmpty) {

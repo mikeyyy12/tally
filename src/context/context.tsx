@@ -10,6 +10,8 @@ interface BlocksContextType {
   setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
   currnetId: string,
   setCurrentId: React.Dispatch<React.SetStateAction<string>>;
+  focusId: string | null,
+  setFocusId: React.Dispatch<React.SetStateAction<string | null>>
 }
 
 export const BlocksContext = createContext<BlocksContextType | undefined>(undefined)
@@ -25,9 +27,11 @@ export const BlocksProvider = ({ children }: { children: React.ReactNode }) => {
 
   const [isOpen, setIsOpen] = useState(false)
   const [currnetId, setCurrentId] = useState('')
+  const [focusId, setFocusId] = useState<string | null>(null)
+
 
   return (
-    <BlocksContext.Provider value={{ blocks, setBlocks, isOpen, setIsOpen, currnetId, setCurrentId }}>
+    <BlocksContext.Provider value={{ blocks, setBlocks, isOpen, setIsOpen, currnetId, setCurrentId, focusId, setFocusId }}>
       {children}
     </BlocksContext.Provider>
   );
