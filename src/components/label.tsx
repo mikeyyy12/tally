@@ -1,7 +1,8 @@
 "use client"
+import { BlocksContext } from "@/context/context";
 import { cn } from "@/utils/cn";
 import { Blocktype } from "@/utils/type";
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 
 const LableElements = [
@@ -14,14 +15,19 @@ const LableElements = [
 export const Label = ({
     coords,
     setBlocks,
-    close
+    close,
+    id
 }: {
     coords: { x: number, y: number },
     close: () => void,
     setBlocks: React.Dispatch<React.SetStateAction<Blocktype[]>>;
+    id: string
 }) => {
 
+    const context = useContext(BlocksContext)
+    if (!context) throw new Error("Context not found")
 
+    const { blocks } = context;
 
     return (
         <div className="absolute inset-0 flex items-center justify-center">
@@ -44,12 +50,13 @@ export const Label = ({
                                 className="text-2xl font-bold text-center"
                                 onClick={() => {
                                     console.log('clicked')
-
-                                    setBlocks((prev) => [
-                                        ...prev,
-                                        { type: "text", id: uuidv4(), content: "Heading new one" },
-                                    ]);
-
+                                    const index = blocks.findIndex((b) => b.id == id)
+                                    const newBlock = { type: "text" as const, id: uuidv4(), content: "Heading new one" }
+                                    const newBlocks = [...blocks.slice(0, index + 1),
+                                        newBlock,
+                                    ...blocks.slice(index + 1)
+                                    ]
+                                    setBlocks(newBlocks);
                                 }
                                 }
                             >

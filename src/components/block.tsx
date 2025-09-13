@@ -66,7 +66,17 @@ export const Block = ({ block, }: { block: Blocktype }) => {
 
     }
 
+    const handleInput = (e: React.KeyboardEvent<HTMLDivElement>) => {
 
+        const value = e.currentTarget.textContent || "";
+        if (value === "") {
+            e.currentTarget.textContent = "";
+        }
+        if (!value.includes("/")) {
+            console.log("closing this shit")
+            setIsOpen(false);
+        }
+    }
     const handleBackspace = ({ e, id }: { e: React.KeyboardEvent<HTMLDivElement>, id: string }) => {
         console.log("presed it fu")
         const currentDiv = e.currentTarget;
@@ -101,17 +111,9 @@ export const Block = ({ block, }: { block: Blocktype }) => {
         case "text":
             return (
                 <div id={block.id} contentEditable={'true'}
-                    onKeyDown={(e: React.KeyboardEvent<HTMLDivElement>) => {
-                        console.log(e.key)
-                    }}
-                    onInput={(e) => {
-                        const value = e.currentTarget.textContent || "";
-                        if (value.trim() === "") {
-                            e.currentTarget.textContent = "";
-                        }
+                    onKeyDown={(e) => handleKeyDown(e)}
 
-                        console.log(value);
-                    }}
+                    onInput={handleInput}
                     suppressContentEditableWarning
                     className={cn(
                         "text-xl text-black focus:outline-none font-semibold tracking-tight px-1 py-1"
@@ -160,17 +162,7 @@ export const Block = ({ block, }: { block: Blocktype }) => {
                 onKeyDown={(e) => handleKeyDown(e)}
 
                 data-placeholder={block.label}
-                onInput={(e) => {
-                    const value = e.currentTarget.textContent || "";
-                    if (value === "") {
-                        e.currentTarget.textContent = "";
-                    }
-                    if (!value.includes("/")) {
-                        console.log("closing this shit")
-                        setIsOpen(false);  // open when `/` is present
-                    }
-
-                }}
+                onInput={handleInput}
                 suppressContentEditableWarning
                 className={cn("[&:empty]:before:content-[attr(data-placeholder)] [&:empty]:before:text-neutral-400 ",
                     "w-full h-full text-sm tracking-wide focus:outline-none  font-normal text-neutral-800 my-1 px-1",
