@@ -11,6 +11,7 @@ interface BlockBase {
 interface TextBlock extends BlockBase {
   type: "text";
   content?: string;
+  label?:string
 }
 
 interface InputBlock extends BlockBase {

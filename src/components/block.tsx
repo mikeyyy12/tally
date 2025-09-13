@@ -10,7 +10,7 @@ export const Block = ({ block, }: { block: Blocktype }) => {
 
     const context = useContext(BlocksContext)
     if (!context) throw new Error("Block context not found")
-    const { blocks, setBlocks, setIsOpen } = context;
+    const { blocks, setBlocks, setIsOpen, setCurrentId } = context;
 
     const handleEnter = ({ id }: { id: string }) => {
         const newBlock = { type: "paragraph" as const, id: uuidv4(), label: "Type '/' to insert block" }
@@ -52,6 +52,7 @@ export const Block = ({ block, }: { block: Blocktype }) => {
             handleBackspace({ e, id: block.id })
         }
         else if (e.key === "/") {
+            setCurrentId(block.id)
             requestAnimationFrame(() => {
                 const selection = window.getSelection();
                 if (selection && selection.rangeCount > 0) {
@@ -112,10 +113,10 @@ export const Block = ({ block, }: { block: Blocktype }) => {
             return (
                 <div id={block.id} contentEditable={'true'}
                     onKeyDown={(e) => handleKeyDown(e)}
-
+                    data-placeholder={block.label}
                     onInput={handleInput}
                     suppressContentEditableWarning
-                    className={cn(
+                    className={cn("[&:empty]:before:content-[attr(data-placeholder)] [&:empty]:before:text-neutral-400 ",
                         "text-xl text-black focus:outline-none font-semibold tracking-tight px-1 py-1"
                     )}>{block.content as string}</div>
             )

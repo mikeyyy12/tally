@@ -16,18 +16,18 @@ export const Label = ({
     coords,
     setBlocks,
     close,
-    id
+
 }: {
     coords: { x: number, y: number },
     close: () => void,
     setBlocks: React.Dispatch<React.SetStateAction<Blocktype[]>>;
-    id: string
+
 }) => {
 
     const context = useContext(BlocksContext)
     if (!context) throw new Error("Context not found")
 
-    const { blocks } = context;
+    const { blocks, setIsOpen, currnetId } = context;
 
     return (
         <div className="absolute inset-0 flex items-center justify-center">
@@ -50,13 +50,16 @@ export const Label = ({
                                 className="text-2xl font-bold text-center"
                                 onClick={() => {
                                     console.log('clicked')
-                                    const index = blocks.findIndex((b) => b.id == id)
-                                    const newBlock = { type: "text" as const, id: uuidv4(), content: "Heading new one" }
+                                    const index = blocks.findIndex((b) => b.id == currnetId)
+                                    const newBlock = { type: "text" as const, id: uuidv4(), label: "Heading 1" }
                                     const newBlocks = [...blocks.slice(0, index + 1),
                                         newBlock,
                                     ...blocks.slice(index + 1)
                                     ]
+                                    console.log("the og block", blocks)
+                                    console.log("the new blocks:", newBlocks)
                                     setBlocks(newBlocks);
+                                    setIsOpen(false)
                                 }
                                 }
                             >

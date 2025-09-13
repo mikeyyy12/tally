@@ -8,6 +8,8 @@ interface BlocksContextType {
   setBlocks: React.Dispatch<React.SetStateAction<Blocktype[]>>;
   isOpen: boolean;
   setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  currnetId: string,
+  setCurrentId: React.Dispatch<React.SetStateAction<string>>;
 }
 
 export const BlocksContext = createContext<BlocksContextType | undefined>(undefined)
@@ -22,9 +24,10 @@ export const BlocksProvider = ({ children }: { children: React.ReactNode }) => {
   ]);
 
   const [isOpen, setIsOpen] = useState(false)
+  const [currnetId, setCurrentId] = useState('')
 
   return (
-    <BlocksContext.Provider value={{ blocks, setBlocks, isOpen, setIsOpen }}>
+    <BlocksContext.Provider value={{ blocks, setBlocks, isOpen, setIsOpen, currnetId, setCurrentId }}>
       {children}
     </BlocksContext.Provider>
   );
