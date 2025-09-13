@@ -1,22 +1,20 @@
 
 import { Block } from "@/components/block"
 import { Label } from "@/components/label";
+import { BlocksContext } from "@/context/context";
 import { Blocktype } from "@/utils/type"
-import { ChangeEvent, useEffect, useState } from "react"
+import { ChangeEvent, useContext, useEffect, useState } from "react"
 import { v4 as uuidv4 } from 'uuid';
 
 
+
 export const EditorPage = () => {
+  const context = useContext(BlocksContext);
+  if (!context) throw new Error("BlocksContext must be used within a BlocksProvider");
   const [formTitle, setFormTitle] = useState("")
   const [isOpen, setIsOpen] = useState(false)
-  const [blocks, setBlocks] = useState<Blocktype[]>([
-    { type: "text", id: uuidv4(), content: "First Name" },
-    { type: "input", id: uuidv4(), label: "What's your name?", required: true },
-    { type: "checkbox", id: uuidv4(), label: "What's your name?", options: ["true", "false"] },
-    { type: "radio", id: uuidv4(), label: "Are you above 18", options: [{ letter: "A", value: "true" }, { letter: "B", value: "false", }] }
-  ])
-
   const [coords, setCoords] = useState<{ x: number, y: number }>({ x: 0, y: 0 });
+  const { blocks, setBlocks } = context;
 
   function getCaretCoordinates() {
     const selection = window.getSelection();
@@ -48,8 +46,15 @@ export const EditorPage = () => {
 
     }
   }
-  const handleEnter = () => {
-    const newBlock = { type: "paragraph", id: uuidv4(), label: "Type '/' to intsert block" }
+  const handleEnter = ({ id }: { id: string }) => {
+    const newBlock = { type: "paragraph" as const, id: uuidv4(), label: "Type '/' to intsert block" }
+    const index = blocks.findIndex(b => b.id === id);
+    const newBlocks = [
+      ...blocks.slice(0, index + 1),
+      newBlock,
+      ...blocks.slice(index + 1)
+    ]
+    setBlocks(newBlocks)
   }
 
   useEffect(() => {
@@ -59,16 +64,12 @@ export const EditorPage = () => {
   return (
     <div
       onKeyDown={(e: React.KeyboardEvent<HTMLDivElement>) => {
-
         if (e.key == "/") {
           openModal();
           console.log("/ is pressed")
         } else if (e.key == "Backspace") {
           console.log("backspace pressed")
           setIsOpen(false)
-        } else if (e.key == "Enter") {
-          console.log("its enter")
-          handleEnter()
         }
       }}
       className="flex flex-col gap-4  ">

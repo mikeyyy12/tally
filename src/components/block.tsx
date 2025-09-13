@@ -1,34 +1,45 @@
+import { BlocksContext } from '@/context/context';
 import { cn } from '@/utils/cn';
 import { Blocktype } from '@/utils/type';
-import React from 'react'
+import React, { useContext, useState } from 'react'
+import { v4 as uuidv4 } from 'uuid';
 
-
-// // [
-//   { "type": "insert", "blockId": "b1", "content": "What's your name?" },
-//   { "type": "update", "blockId": "b1", "prev": "What's your name?", "next": "Your full name?" },
-//   { "type": "insertOption", "blockId": "b2", "optionId": "o1", "label": "Red" }
-// ]
 
 export const Block = ({ block, }: { block: Blocktype }) => {
+    const context = useContext(BlocksContext)
+    if (!context) throw new Error("Block context not found")
+    const { blocks, setBlocks } = context;
 
+    const handleEnter = ({ id }: { id: string }) => {
+        const newBlock = { type: "paragraph" as const, id: uuidv4(), label: "Type '/' to intsert block" }
+        const index = blocks.findIndex(b => b.id === id);
+        const newBlocks = [
+            ...blocks.slice(0, index + 1),
+            newBlock,
+            ...blocks.slice(index + 1)
+        ]
+        setBlocks(newBlocks)
+    }
     switch (block.type) {
         case "text":
             return (
                 <div id={block.id} contentEditable={'true'}
+                    onKeyDown={(e: React.KeyboardEvent<HTMLDivElement>) => {
+                        console.log(e.key)
+                    }}
                     onInput={(e) => {
                         const value = e.currentTarget.textContent;
                         console.log(value);
                     }}
                     suppressContentEditableWarning
                     className={cn(
-                        "text-xl text-black focus:outline-none font-semibold tracking-tight p-2"
+                        "text-xl text-black focus:outline-none font-semibold tracking-tight px-1 py-1"
                     )}>{block.content as string}</div>
             )
         case "input":
             return (
                 <div id={block.id} className='w-60  shadow-checkbox  rounded-lg px-4 py-2 text-sm '>
                     <div
-
                         data-placeholder="Input"
                         contentEditable
                         onKeyDown={(e) => {
@@ -47,7 +58,12 @@ export const Block = ({ block, }: { block: Blocktype }) => {
             return (
                 <div id={block.id} className=" flex flex-col px-1">
                     {block.options.map((option, idx) => (
-                        <div key={idx} className='flex items-center gap-2'>
+                        <div key={idx}
+                            onKeyDown={(e: React.KeyboardEvent<HTMLDivElement>) => {
+                                e.preventDefault();
+                                console.log(e.key)
+                            }}
+                            className='flex items-center gap-2'>
                             <div className='rounded-[3px]  h-[17px] w-[18px] bg-white  shadow-checkbox'></div>
                             <div
                                 suppressContentEditableWarning
@@ -59,6 +75,27 @@ export const Block = ({ block, }: { block: Blocktype }) => {
                         </div>
                     ))}
                 </div>
+            )
+        case "paragraph":
+            return (<div id={block.id} contentEditable={'true'}
+                onKeyDown={(e: React.KeyboardEvent<HTMLDivElement>) => {
+                    console.log(e.key)
+                    if (e.key == "Enter") {
+                        e.preventDefault()
+                        handleEnter({ id: block.id })
+                    }
+                }}
+
+                data-placeholder={block.label}
+                onInput={(e) => {
+                    const value = e.currentTarget.textContent;
+                    console.log(value);
+                }}
+                suppressContentEditableWarning
+                className={cn("[&:empty]:before:content-[attr(data-placeholder)] [&:empty]:before:text-neutral-400 ",
+                    "w-full h-full text-sm tracking-wide focus:outline-none  font-normal text-neutral-800 my-1 px-1",
+                    "whitespace-nowrap overflow-x-auto overflow-y-hidden scrollbar-hide"
+                )}></div>
             )
         case "radio":
             return (

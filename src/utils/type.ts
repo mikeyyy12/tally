@@ -5,7 +5,7 @@ export interface RadioOption {
 
 interface BlockBase {
   id: string;
-  type: "text" | "input" | "checkbox" | "radio" | "textarea";
+  type: "text" | "input" | "checkbox" | "radio" | "textarea" | "paragraph";
 }
 
 interface TextBlock extends BlockBase {
@@ -37,4 +37,9 @@ interface RadioBlock extends BlockBase {
   options: RadioOption[];
 }
 
-export type Blocktype = TextBlock | InputBlock | CheckboxBlock | RadioBlock;
+interface Paragraph extends BlockBase{
+  type:"paragraph",
+  label:string;
+}
+
+export type Blocktype = TextBlock | InputBlock | CheckboxBlock | RadioBlock | Paragraph;
