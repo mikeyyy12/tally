@@ -51,19 +51,21 @@ export const Block = ({ block, }: { block: Blocktype }) => {
         else if (e.key == "Backspace") {
             handleBackspace({ e, id: block.id })
         }
-        else if (e.key == "/") {
-
-            setIsOpen(true)
+        else if (e.key === "/") {
+            requestAnimationFrame(() => {
+                const selection = window.getSelection();
+                if (selection && selection.rangeCount > 0) {
+                    const range = selection.getRangeAt(0);
+                    const rect = range.getBoundingClientRect();
+                    if (rect && rect.top > 0) {
+                        setIsOpen(true);
+                    }
+                }
+            });
         }
+
     }
-    const handleInput = (e: React.FormEvent<HTMLDivElement>) => {
-        const value = e.currentTarget.textContent || "";
 
-        // If user deletes "/", close modal
-        if (!value.includes("/")) {
-            setIsOpen(false);
-        }
-    };
 
     const handleBackspace = ({ e, id }: { e: React.KeyboardEvent<HTMLDivElement>, id: string }) => {
         console.log("presed it fu")
@@ -164,9 +166,10 @@ export const Block = ({ block, }: { block: Blocktype }) => {
                         e.currentTarget.textContent = "";
                     }
                     if (!value.includes("/")) {
-                        setIsOpen(false);
+                        console.log("closing this shit")
+                        setIsOpen(false);  // open when `/` is present
                     }
-                    console.log(value);
+
                 }}
                 suppressContentEditableWarning
                 className={cn("[&:empty]:before:content-[attr(data-placeholder)] [&:empty]:before:text-neutral-400 ",

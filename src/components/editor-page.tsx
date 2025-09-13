@@ -49,6 +49,8 @@ export const EditorPage = () => {
 
 
   useEffect(() => {
+
+    console.log(isOpen, 'issopne value')
     if (isOpen) {
       openModal()
     }
@@ -56,8 +58,6 @@ export const EditorPage = () => {
 
   return (
     <div
-
-
       className="flex flex-col gap-4  ">
       <div >
         <input className="text-3xl font-bold text-neutral-800 outline-none p-2" placeholder="Form title" type="text" onChange={(e: ChangeEvent<HTMLInputElement>) => setFormTitle(e.target.value)} value={formTitle} />
