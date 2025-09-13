@@ -123,7 +123,7 @@ export const Block = ({ block, }: { block: Blocktype }) => {
                     data-placeholder={block.label}
                     onInput={handleInput}
                     suppressContentEditableWarning
-                    className={cn("[&:empty]:before:content-[attr(data-placeholder)] [&:empty]:before:text-neutral-400 ",
+                    className={cn("[&:empty]:before:content-[attr(data-placeholder)] [&:empty]:before:text-neutral-400",
                         "text-xl text-black focus:outline-none font-semibold tracking-tight px-1 py-1"
                     )}>{block.content as string}</div>
             )
@@ -136,6 +136,7 @@ export const Block = ({ block, }: { block: Blocktype }) => {
                     data-placeholder={block.label}
                     contentEditable={'true'}
                     suppressContentEditableWarning
+                    onInput={handleInput}
                     onKeyDown={(e) => handleKeyDown({ e, type: block.type })}
                     className={cn("[&:empty]:before:content-[attr(data-placeholder)] [&:empty]:before:text-neutral-400 ",
                         "w-full h-full text-sm tracking-wide focus:outline-none  font-normal text-neutral-800",
