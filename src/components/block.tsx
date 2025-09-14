@@ -7,7 +7,6 @@ import { v4 as uuidv4 } from 'uuid';
 
 export const Block = ({ block, }: { block: Blocktype }) => {
 
-
     const context = useContext(BlocksContext)
     if (!context) throw new Error("Block context not found")
     const { blocks, setBlocks, setIsOpen, setCurrentId, focusId, setFocusId } = context;
@@ -48,7 +47,38 @@ export const Block = ({ block, }: { block: Blocktype }) => {
         }
     }, [focusId])
 
-    const handleKeyDown = ({ e, type }: { e: React.KeyboardEvent<HTMLDivElement>, type: string }) => {
+
+    function isCaretAtStart() {
+        const selection = window.getSelection();
+        if (!selection || selection.rangeCount === 0) return false
+        const range = selection?.getRangeAt(0)
+        return range?.startOffset == 0 && range?.endOffset == 0
+    }
+
+    function isCaretAtEnd(div: HTMLDivElement) {
+        const selection = window.getSelection();
+        if (!selection || selection.rangeCount === 0) false
+        const range = selection?.getRangeAt(0)
+        return range?.endOffset === div.textContent.length
+    }
+
+    function focusBlock(div: HTMLDivElement, atStart: boolean) {
+        div.focus();
+        console.log('focus', div.id)
+        const range = document.createRange()
+        if (atStart) {
+            const firstChild = div.firstChild || div;
+            range.setStart(firstChild, 0)
+        } else {
+            range.selectNodeContents(div)
+            range.collapse(false)
+        }
+        const sel = window.getSelection();
+        sel?.removeAllRanges()
+        sel?.addRange(range)
+    }
+    const handleKeyDown = ({ e, type, blockId }: { e: React.KeyboardEvent<HTMLDivElement>, type: string, blockId: string }) => {
+        console.log("key", e.key)
 
         if (e.key == "Enter") {
             e.preventDefault()
@@ -56,6 +86,33 @@ export const Block = ({ block, }: { block: Blocktype }) => {
         }
         else if (e.key == "Backspace") {
             handleBackspace({ e, id: block.id })
+        }
+        else if (e.key === "ArrowUp") {
+            if (isCaretAtStart()) {
+                const index = blocks.findIndex((b) => b.id == blockId)
+                const prevDivId = blocks[index - 1].id
+                console.log("caret at start")
+                e.preventDefault();
+                console.log(prevDivId, blockId)
+                console.log(blocks)
+                const prevDiv = document.getElementById(prevDivId)
+                console.log("checking prev", prevDiv, document.getElementById(blockId))
+                if (prevDiv) focusBlock(prevDiv as HTMLDivElement, false)
+            }
+        }
+        else if (e.key === "ArrowDown") {
+            const div = document.getElementById(blockId)
+            if (isCaretAtEnd(div as HTMLDivElement)) {
+                const index = blocks.findIndex((b) => b.id == blockId)
+                const nextId = blocks[index + 1].id
+                console.log("caret at start")
+                e.preventDefault();
+                console.log(nextId, blockId)
+                console.log(blocks)
+                const nextDiv = document.getElementById(nextId)
+                console.log("checking prev", nextDiv, document.getElementById(blockId))
+                if (nextDiv) focusBlock(nextDiv as HTMLDivElement, true)
+            }
         }
         else if (e.key === "/" && type == "paragraph") {
             setCurrentId(block.id)
@@ -80,6 +137,7 @@ export const Block = ({ block, }: { block: Blocktype }) => {
         if (value === "") {
             e.currentTarget.textContent = "";
         }
+
 
         if (!value.includes("/")) {
             setIsOpen(false);
@@ -119,9 +177,11 @@ export const Block = ({ block, }: { block: Blocktype }) => {
         case "text":
             return (
                 <div id={block.id} contentEditable={'true'}
-                    onKeyDown={(e) => handleKeyDown({ e, type: block.type })}
+
+                    onKeyDown={(e) => handleKeyDown({ e, type: block.type, blockId: block.id })}
                     data-placeholder={block.label}
                     onInput={handleInput}
+
                     suppressContentEditableWarning
                     className={cn("[&:empty]:before:content-[attr(data-placeholder)] [&:empty]:before:text-neutral-400",
                         "text-xl text-black focus:outline-none font-semibold tracking-tight px-1 py-1"
@@ -137,7 +197,7 @@ export const Block = ({ block, }: { block: Blocktype }) => {
                     contentEditable={'true'}
                     suppressContentEditableWarning
                     onInput={handleInput}
-                    onKeyDown={(e) => handleKeyDown({ e, type: block.type })}
+                    onKeyDown={(e) => handleKeyDown({ e, type: block.type, blockId: block.id })}
                     className={cn("[&:empty]:before:content-[attr(data-placeholder)] [&:empty]:before:text-neutral-400 ",
                         "w-full h-full text-sm tracking-wide focus:outline-none  font-normal text-neutral-800",
                         "w-60  shadow-checkbox  rounded-lg px-4 py-2 my-1 text-sm",
@@ -150,7 +210,7 @@ export const Block = ({ block, }: { block: Blocktype }) => {
                 <div id={block.id} className=" flex flex-col px-1">
                     {block.options.map((option, idx) => (
                         <div key={idx}
-                            onKeyDown={(e) => handleKeyDown({ e, type: block.type })}
+                            onKeyDown={(e) => handleKeyDown({ e, type: block.type, blockId: block.id })}
                             className='flex items-center gap-2'>
                             <div className='rounded-[3px]  h-[17px] w-[18px] bg-white  shadow-checkbox'></div>
                             <div
@@ -166,9 +226,10 @@ export const Block = ({ block, }: { block: Blocktype }) => {
             )
         case "paragraph":
             return (<div id={block.id} contentEditable={'true'}
-                onKeyDown={(e) => handleKeyDown({ e, type: block.type })}
+                onKeyDown={(e) => handleKeyDown({ e, type: block.type, blockId: block.id })}
                 data-placeholder={block.label}
                 onInput={handleInput}
+
                 suppressContentEditableWarning
                 className={cn("[&:empty]:before:content-[attr(data-placeholder)] [&:empty]:before:text-neutral-400 ",
                     "w-full h-full text-sm tracking-wide focus:outline-none  font-normal text-neutral-800 my-1 px-1",
@@ -182,7 +243,7 @@ export const Block = ({ block, }: { block: Blocktype }) => {
                     id={block.id} className=" flex flex-col px-1 gap-3  ">
                     {block.options!.map((option, idx) => (
                         <div key={idx}
-                            onKeyDown={(e) => handleKeyDown({ e, type: block.type })}
+                            onKeyDown={(e) => handleKeyDown({ e, type: block.type, blockId: block.id })}
                             className='flex items-center gap-2 max-w-fit rounded-lg shadow-checkbox px-3 '>
                             <div className='rounded-[3px]  h-[17px] w-[18px] bg-radio  shadow-checkbox p-2 text-xs font-bold text-shadow-xl flex items-center justify-center text-white '>{option.letter}</div>
                             <div
