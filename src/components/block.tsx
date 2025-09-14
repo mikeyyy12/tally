@@ -1,4 +1,6 @@
+"use client"
 import { BlocksContext } from '@/context/context';
+
 import { cn } from '@/utils/cn';
 import { Blocktype } from '@/utils/type';
 import React, { useContext, useEffect, useState } from 'react'
@@ -78,7 +80,7 @@ export const Block = ({ block, }: { block: Blocktype }) => {
         sel?.addRange(range)
     }
     const handleKeyDown = ({ e, type, blockId }: { e: React.KeyboardEvent<HTMLDivElement>, type: string, blockId: string }) => {
-        console.log("key", e.key)
+        console.log("key", blocks)
 
         if (e.key == "Enter") {
             e.preventDefault()
@@ -193,6 +195,7 @@ export const Block = ({ block, }: { block: Blocktype }) => {
 
                 <div
                     id={block.id}
+
                     data-placeholder={block.label}
                     contentEditable={'true'}
                     suppressContentEditableWarning
@@ -207,7 +210,9 @@ export const Block = ({ block, }: { block: Blocktype }) => {
             )
         case "checkbox":
             return (
-                <div id={block.id} className=" flex flex-col px-1">
+                <div id={block.id}
+
+                    className=" flex flex-col px-1">
                     {block.options.map((option, idx) => (
                         <div key={idx}
                             onKeyDown={(e) => handleKeyDown({ e, type: block.type, blockId: block.id })}

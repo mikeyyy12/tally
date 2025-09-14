@@ -1,4 +1,4 @@
-
+"use client"
 import { Block } from "@/components/block"
 import { Label } from "@/components/label";
 import { BlocksContext } from "@/context/context";
@@ -32,9 +32,19 @@ export const EditorPage = () => {
       height: rect.height,
     };
   }
+  useEffect(() => {
+    console.log('State IDs:', blocks.map(b => b.id));
 
+    const domIds = blocks.map(b => {
+      const el = document.getElementById(b.id);
+      return { id: b.id, domId: el?.id ?? null, count: document.querySelectorAll(`#${CSS.escape(b.id)}`).length };
+    });
+
+    console.table(domIds);
+  }, [blocks]);
 
   const openModal = () => {
+    console.log(blocks)
     console.log('open model triggerd')
     setIsOpen(true)
     const caret = getCaretCoordinates();
@@ -65,7 +75,7 @@ export const EditorPage = () => {
       <div className="flex flex-col gap-2"
       >
         {blocks.map((block, idx) => (
-          <Block key={idx} block={block} />
+          <Block key={block.id} block={block} />
         ))}
       </div>
       <div className="px-4 py-2 bg-sky-500 text-white w-fit rounded-lg cursor-pointer"
