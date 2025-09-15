@@ -33,19 +33,19 @@ export const EditorPage = () => {
     };
   }
   useEffect(() => {
-    console.log('State IDs:', blocks.map(b => b.id));
+
 
     const domIds = blocks.map(b => {
       const el = document.getElementById(b.id);
       return { id: b.id, domId: el?.id ?? null, count: document.querySelectorAll(`#${CSS.escape(b.id)}`).length };
     });
 
-    console.table(domIds);
+
   }, [blocks]);
 
   const openModal = () => {
-    console.log(blocks)
-    console.log('open model triggerd')
+
+
     setIsOpen(true)
     const caret = getCaretCoordinates();
     if (caret) {
@@ -57,10 +57,9 @@ export const EditorPage = () => {
     }
   }
 
-
   useEffect(() => {
 
-    console.log(isOpen, 'issopne value')
+
     if (isOpen) {
       openModal()
     }

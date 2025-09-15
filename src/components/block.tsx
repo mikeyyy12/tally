@@ -2,7 +2,7 @@
 import { BlocksContext } from '@/context/context';
 
 import { cn } from '@/utils/cn';
-import { Blocktype } from '@/utils/type';
+import { Blocktype, CheckboxBlock } from '@/utils/type';
 import React, { useContext, useEffect, useState } from 'react'
 import { v4 as uuidv4 } from 'uuid';
 
@@ -90,6 +90,7 @@ export const Block = ({ block, }: { block: Blocktype }) => {
             handleBackspace({ e, id: block.id })
         }
         else if (e.key === "ArrowUp") {
+            // e.preventDefault()
             if (isCaretAtStart()) {
                 const index = blocks.findIndex((b) => b.id == blockId)
                 const prevDivId = blocks[index - 1].id
@@ -208,26 +209,40 @@ export const Block = ({ block, }: { block: Blocktype }) => {
                     )} >{block.content as string}</div>
 
             )
-        case "checkbox":
+        case "checkbox-option":
+            const options = blocks
+                .filter((b): b is CheckboxBlock => b.type === "checkbox-option" && b.parentId === block.parentId)
+                .sort((a, b) => blocks.indexOf(a) - blocks.indexOf(b));
+            console.log("options:", blocks.filter(b => b.type == "checkbox-group"))
             return (
-                <div id={block.id}
+                <>
+                    {
+                        options.map((opt, idx) => (
+                            <div id={opt.id}
+                                onKeyDown={(e) => handleKeyDown({ e, type: opt.type, blockId: opt.id })}
+                                className='flex items-center gap-2'>
+                                <div className='rounded-[3px]  h-[17px] w-[18px] bg-white  shadow-checkbox'></div>
+                                <div
+                                    suppressContentEditableWarning
+                                    data-placeholder={`Option`}
+                                    contentEditable="true"
+                                    className={cn("[&:empty]:before:content-[attr(data-placeholder)]  [&:empty]:before:text-neutral-400",
+                                        "w-full h-full text-sm  focus:outline-none py-1 font-normal"
+                                    )} >{opt.value}</div>
+                            </div>
+                        ))
+                    }
+                    < div
+                        className='flex items-center gap-2 opacity-20 cursor-pointer hover:opacity-80 pt-2' >
+                        <div className='rounded-[3px]  h-[17px] w-[18px] bg-white  shadow-checkbox'></div>
+                        <div
+                            className={cn(
+                                "w-full h-full text-sm  focus:outline-none py-2 font-normal "
+                            )} >Add Option</div>
+                    </div >
 
-                    className=" flex flex-col px-1">
-                    {block.options.map((option, idx) => (
-                        <div key={idx}
-                            onKeyDown={(e) => handleKeyDown({ e, type: block.type, blockId: block.id })}
-                            className='flex items-center gap-2'>
-                            <div className='rounded-[3px]  h-[17px] w-[18px] bg-white  shadow-checkbox'></div>
-                            <div
-                                suppressContentEditableWarning
-                                data-placeholder={block.label}
-                                contentEditable="true"
-                                className={cn("[&:empty]:before:content-[attr(data-placeholder)]  [&:empty]:before:text-neutral-400",
-                                    "w-full h-full text-sm  focus:outline-none py-2 font-normal"
-                                )} >{option}</div>
-                        </div>
-                    ))}
-                </div>
+
+                </>
             )
         case "paragraph":
             return (<div id={block.id} contentEditable={'true'}
@@ -246,20 +261,20 @@ export const Block = ({ block, }: { block: Blocktype }) => {
                 <div
 
                     id={block.id} className=" flex flex-col px-1 gap-3  ">
-                    {block.options!.map((option, idx) => (
-                        <div key={idx}
-                            onKeyDown={(e) => handleKeyDown({ e, type: block.type, blockId: block.id })}
-                            className='flex items-center gap-2 max-w-fit rounded-lg shadow-checkbox px-3 '>
-                            <div className='rounded-[3px]  h-[17px] w-[18px] bg-radio  shadow-checkbox p-2 text-xs font-bold text-shadow-xl flex items-center justify-center text-white '>{option.letter}</div>
-                            <div
-                                data-placeholder="Input"
-                                contentEditable="true"
-                                suppressContentEditableWarning
-                                className={cn(
-                                    "w-full h-full text-sm  focus:outline-none py-2 font-normal text-neutral-800"
-                                )} >{option.value}</div>
-                        </div>
-                    ))}
+
+                    <div
+                        onKeyDown={(e) => handleKeyDown({ e, type: block.type, blockId: block.id })}
+                        className='flex items-center gap-2 max-w-fit rounded-lg shadow-checkbox px-3 '>
+                        <div className='rounded-[3px]  h-[17px] w-[18px] bg-radio  shadow-checkbox p-2 text-xs font-bold text-shadow-xl flex items-center justify-center text-white '>{block.letter}</div>
+                        <div
+                            data-placeholder="Input"
+                            contentEditable="true"
+                            suppressContentEditableWarning
+                            className={cn(
+                                "w-full h-full text-sm  focus:outline-none py-2 font-normal text-neutral-800"
+                            )} >{block.value}</div>
+                    </div>
+
                 </div>
             )
 

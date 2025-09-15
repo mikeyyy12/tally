@@ -9,7 +9,7 @@ const LableElements = [
     { type: "text", id: uuidv4() },
     { type: "input", id: uuidv4() },
     { type: "checkbox", id: uuidv4() },
-    { type: "radio", id: uuidv4(), options: [{ letter: "", value: "" }] },
+    { type: "radio", id: uuidv4(), letter: "", value: "" },
 ];
 
 export const Label = ({
@@ -41,36 +41,42 @@ export const Label = ({
         const cleaned = rawText.trim();
 
         const isEmpty = cleaned === "" || cleaned === "/"
-        let newBlock
-        if (type == "text") {
-            newBlock = { type: "text" as const, id: uuidv4(), label: "Heading 1", content: "" };
-        } else if (type == "input") {
-            newBlock = { type: "input" as const, id: uuidv4(), label: "Input box", content: "" }
-        } else if (type == "checkbox") {
-            newBlock = { type: "checkbox" as const, id: uuidv4(), label: "checkbox", content: "", options: ["true", "fuck"] }
-        } else if (type == "radio") {
-            newBlock = { type: "radio" as const, id: uuidv4(), options: [{ letter: "", value: "" }] }
+        let newBlocksToInsert: Blocktype[] = [];
+        if (type === "text") {
+            newBlocksToInsert = [{ type: "text", id: uuidv4(), label: "Heading 1", content: "" }];
+        } else if (type === "input") {
+            newBlocksToInsert = [{ type: "input", id: uuidv4(), label: "Input box", content: "" }];
+        } else if (type === "checkbox-group") {
+            const parentId = uuidv4();
+            newBlocksToInsert = [
+                { type: "checkbox-group", id: parentId, label: "Checkbox Question" },
+                { type: "checkbox-option", parentId: parentId, id: uuidv4(), label: "Option 1", value: "option-1" },
+            ];
+        } else if (type === "radio") {
+            newBlocksToInsert = [{ type: "radio", id: uuidv4(), letter: "A", value: "New radio" }];
         }
-        if (!newBlock) return
+
+        if (!newBlocksToInsert) return
 
         let newBlocks;
         if (isEmpty) {
             currentDiv.textContent = "";
             newBlocks = [...blocks.slice(0, index),
-                newBlock,
+            ...newBlocksToInsert,
             ...blocks.slice(index + 1)
             ]
         } else {
             newBlocks = [...blocks.slice(0, index + 1),
-                newBlock,
+            ...newBlocksToInsert,
             ...blocks.slice(index + 1)
             ]
         }
 
         setBlocks(newBlocks);
         setIsOpen(false)
-        console.log("new block id:", newBlock.id)
-        setFocusId(newBlock.id)
+        if (type == "checkbox-group") {
+            setFocusId((newBlocksToInsert as Blocktype[])[1].id)
+        }
 
     }
     return (
@@ -114,7 +120,7 @@ export const Label = ({
                                 ></div>
                                 <div>short content</div>
                             </div>
-                        ) : label.type === "checkbox" ? (
+                        ) : label.type === "checkbox-group" ? (
                             <div
                                 className="flex items-center gap-1"
                                 onClick={() => {
@@ -127,39 +133,39 @@ export const Label = ({
                         ) : (
                             <div
                                 className="flex items-center gap-1"
-                                onClick={() =>
-                                    setBlocks((prev) => {
-                                        if (prev.length > 0 && prev[prev.length - 1].type === "radio") {
+                            // onClick={() =>
+                            //     setBlocks((prev) => {
+                            //         if (prev.length > 0 && prev[prev.length - 1].type === "radio") {
 
-                                            return prev.map((block, idx) => {
-                                                if (idx === prev.length - 1 && block.type == "radio") {
-                                                    const lastOption = block.options![block.options!.length - 1];
-                                                    const nextLetter = String.fromCharCode(lastOption.letter.charCodeAt(0) + 1);
+                            //             return prev.map((block, idx) => {
+                            //                 if (idx === prev.length - 1 && block.type == "radio") {
+                            //                     const lastOption = block.options![block.options!.length - 1];
+                            //                     const nextLetter = String.fromCharCode(lastOption.letter.charCodeAt(0) + 1);
 
-                                                    return {
-                                                        ...block,
-                                                        options: [
-                                                            ...block.options!,
-                                                            { letter: nextLetter, value: `Option ${nextLetter}` },
-                                                        ],
-                                                    };
-                                                }
-                                                return block;
-                                            });
-                                        } else {
+                            //                     return {
+                            //                         ...block,
+                            //                         options: [
+                            //                             ...block.options!,
+                            //                             { letter: nextLetter, value: `Option ${nextLetter}` },
+                            //                         ],
+                            //                     };
+                            //                 }
+                            //                 return block;
+                            //             });
+                            //         } else {
 
-                                            return [
-                                                ...prev,
-                                                {
-                                                    type: "radio",
-                                                    id: uuidv4(),
-                                                    label: "New radio",
-                                                    options: [{ letter: "A", value: "Option A" }],
-                                                },
-                                            ];
-                                        }
-                                    })
-                                }
+                            //             return [
+                            //                 ...prev,
+                            //                 {
+                            //                     type: "radio",
+                            //                     id: uuidv4(),
+                            //                     label: "New radio",
+                            //                     options: [{ letter: "A", value: "Option A" }],
+                            //                 },
+                            //             ];
+                            //         }
+                            //     })
+                            // }
                             >
                                 <div className="size-2 rounded-xs shadow-checkbox"></div>
                                 <p>Multiple Choice</p>

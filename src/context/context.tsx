@@ -16,11 +16,14 @@ interface BlocksContextType {
 
 
 const intialBlock = [
-  { type: "text", id: uuidv4(), content: "First Name" },
-  { type: "input", id: uuidv4(), label: "What's your name?", required: true },
-  { type: "paragraph", id: uuidv4(), label: "Type '/' to insert block" },
-  { type: "checkbox", id: uuidv4(), label: "What's your name?", options: ["true", "false"] },
-  { type: "radio", id: uuidv4(), label: "Are you above 18", options: [{ letter: "A", value: "true" }, { letter: "B", value: "false" }] }
+  { type: "text", id: "12", content: "First Name" },
+  { type: "input", id: "124", label: "What's your name?", required: true },
+  { type: "paragraph", id: "123", label: "Type '/' to insert block" },
+  { type: "checkbox-group", id: "121", label: "What's your name?", },
+  { type: "checkbox-option", id: "1213", parentId: "121", value: "shubham", },
+  { type: "checkbox-option", id: "1214", parentId: "121", value: "nine" },
+  { type: "radio", id: "122", letter: "A", value: "nice" },
+  { type: "radio", id: "1232", letter: "B", value: "not nice" }
 ]
 export const BlocksContext = createContext<BlocksContextType | undefined>(undefined)
 
