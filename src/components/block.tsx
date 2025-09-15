@@ -135,7 +135,7 @@ export const Block = ({ block, }: { block: Blocktype }) => {
             id: uuidv4(),
             type: "checkbox-option",
             parentId: groupId,
-            label: `Opt ${options.length + 1}`,
+            label: `Option ${options.length + 1}`,
         };
         const lastIndex = (() => {
             let last = -1;
@@ -243,7 +243,7 @@ export const Block = ({ block, }: { block: Blocktype }) => {
                                 <div className='rounded-[3px]  h-[17px] w-[18px] bg-white  shadow-checkbox'></div>
                                 <div
                                     suppressContentEditableWarning
-                                    data-placeholder={`Option`}
+                                    data-placeholder={opt.label}
                                     contentEditable="true"
                                     className={cn("[&:empty]:before:content-[attr(data-placeholder)]  [&:empty]:before:text-neutral-400",
                                         "w-full h-full text-sm  focus:outline-none py-px font-normal"
