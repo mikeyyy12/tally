@@ -37,7 +37,7 @@ interface CheckBoxGroup extends BlockBase{
 export interface CheckboxBlock extends BlockBase {
   type: "checkbox-option";
    label?:string
-  value:string;
+  value?:string;
   parentId:string
 }
 

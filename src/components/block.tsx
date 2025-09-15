@@ -33,7 +33,7 @@ export const Block = ({ block, }: { block: Blocktype }) => {
             if (div && !div.isContentEditable) {
                 const editable = div.querySelector('[contenteditable="true"]') as HTMLElement;
                 if (editable) div = editable;
-                console.log("this is div->", div)
+
             }
 
             if (div) {
@@ -66,7 +66,7 @@ export const Block = ({ block, }: { block: Blocktype }) => {
 
     function focusBlock(div: HTMLDivElement, atStart: boolean) {
         div.focus();
-        console.log('focus', div.id)
+
         const range = document.createRange()
         if (atStart) {
             const firstChild = div.firstChild || div;
@@ -80,7 +80,7 @@ export const Block = ({ block, }: { block: Blocktype }) => {
         sel?.addRange(range)
     }
     const handleKeyDown = ({ e, type, blockId }: { e: React.KeyboardEvent<HTMLDivElement>, type: string, blockId: string }) => {
-        console.log("key", blocks)
+
 
         if (e.key == "Enter") {
             e.preventDefault()
@@ -94,12 +94,8 @@ export const Block = ({ block, }: { block: Blocktype }) => {
             if (isCaretAtStart()) {
                 const index = blocks.findIndex((b) => b.id == blockId)
                 const prevDivId = blocks[index - 1].id
-                console.log("caret at start")
                 e.preventDefault();
-                console.log(prevDivId, blockId)
-                console.log(blocks)
                 const prevDiv = document.getElementById(prevDivId)
-                console.log("checking prev", prevDiv, document.getElementById(blockId))
                 if (prevDiv) focusBlock(prevDiv as HTMLDivElement, false)
             }
         }
@@ -108,12 +104,10 @@ export const Block = ({ block, }: { block: Blocktype }) => {
             if (isCaretAtEnd(div as HTMLDivElement)) {
                 const index = blocks.findIndex((b) => b.id == blockId)
                 const nextId = blocks[index + 1].id
-                console.log("caret at start")
+
                 e.preventDefault();
-                console.log(nextId, blockId)
-                console.log(blocks)
+
                 const nextDiv = document.getElementById(nextId)
-                console.log("checking prev", nextDiv, document.getElementById(blockId))
                 if (nextDiv) focusBlock(nextDiv as HTMLDivElement, true)
             }
         }
@@ -132,11 +126,38 @@ export const Block = ({ block, }: { block: Blocktype }) => {
         }
 
     }
-
+    const handleAddOption = (groupId: string) => {
+        const options = blocks.filter(
+            b => b.type === "checkbox-option" && b.parentId === groupId
+        );
+        console.log("lenght", options.length, blocks)
+        const newOption: CheckboxBlock = {
+            id: uuidv4(),
+            type: "checkbox-option",
+            parentId: groupId,
+            label: `Opt ${options.length + 1}`,
+        };
+        const lastIndex = (() => {
+            let last = -1;
+            blocks.forEach((b, idx) => {
+                if (b.type === "checkbox-option" && b.parentId === groupId) {
+                    last = idx;
+                }
+            });
+            return last;
+        })();
+        const insertIndex = lastIndex >= 0 ? lastIndex + 1 : blocks.findIndex(b => b.id === groupId) + 1;
+        console.log(insertIndex, 'inset')
+        const newBlocks = [
+            ...blocks.slice(0, insertIndex),
+            newOption,
+            ...blocks.slice(insertIndex),
+        ];
+        setBlocks(newBlocks);
+    }
     const handleInput = (e: React.KeyboardEvent<HTMLDivElement>) => {
 
         const value = e.currentTarget.textContent || "";
-        console.log('value', value)
         if (value === "") {
             e.currentTarget.textContent = "";
         }
@@ -151,7 +172,6 @@ export const Block = ({ block, }: { block: Blocktype }) => {
         const currentDiv = e.currentTarget;
         const isEmpty = !currentDiv.textContent || currentDiv.textContent === "";
         if (isEmpty) {
-            console.log('is empt')
             e.preventDefault()
             const index = blocks.findIndex((b) => b.id == id)
             const newBlocks = [
@@ -209,11 +229,10 @@ export const Block = ({ block, }: { block: Blocktype }) => {
                     )} >{block.content as string}</div>
 
             )
-        case "checkbox-option":
+        case "checkbox-group":
             const options = blocks
-                .filter((b): b is CheckboxBlock => b.type === "checkbox-option" && b.parentId === block.parentId)
+                .filter((b): b is CheckboxBlock => b.type === "checkbox-option" && b.parentId === block.id)
                 .sort((a, b) => blocks.indexOf(a) - blocks.indexOf(b));
-            console.log("options:", blocks.filter(b => b.type == "checkbox-group"))
             return (
                 <>
                     {
@@ -227,17 +246,19 @@ export const Block = ({ block, }: { block: Blocktype }) => {
                                     data-placeholder={`Option`}
                                     contentEditable="true"
                                     className={cn("[&:empty]:before:content-[attr(data-placeholder)]  [&:empty]:before:text-neutral-400",
-                                        "w-full h-full text-sm  focus:outline-none py-1 font-normal"
+                                        "w-full h-full text-sm  focus:outline-none py-px font-normal"
                                     )} >{opt.value}</div>
                             </div>
-                        ))
-                    }
+                        ))}
                     < div
-                        className='flex items-center gap-2 opacity-20 cursor-pointer hover:opacity-80 pt-2' >
+                        className='flex items-center gap-2 opacity-20 cursor-pointer hover:opacity-80 ' >
                         <div className='rounded-[3px]  h-[17px] w-[18px] bg-white  shadow-checkbox'></div>
                         <div
+                            onClick={() => {
+                                handleAddOption(block.id)
+                            }}
                             className={cn(
-                                "w-full h-full text-sm  focus:outline-none py-2 font-normal "
+                                "w-full h-full text-sm  focus:outline-none py-1 font-normal "
                             )} >Add Option</div>
                     </div >
 
@@ -259,9 +280,7 @@ export const Block = ({ block, }: { block: Blocktype }) => {
         case "radio":
             return (
                 <div
-
                     id={block.id} className=" flex flex-col px-1 gap-3  ">
-
                     <div
                         onKeyDown={(e) => handleKeyDown({ e, type: block.type, blockId: block.id })}
                         className='flex items-center gap-2 max-w-fit rounded-lg shadow-checkbox px-3 '>
