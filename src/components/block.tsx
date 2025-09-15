@@ -286,6 +286,7 @@ export const Block = ({ block, }: { block: Blocktype }) => {
                                 className='flex items-center gap-2'>
                                 <div className='rounded-[3px]  h-[17px] w-[18px] bg-white  shadow-checkbox'></div>
                                 <div
+                                    onInput={handleInput}
                                     suppressContentEditableWarning
                                     data-placeholder={opt.label}
                                     contentEditable="true"
@@ -331,6 +332,7 @@ export const Block = ({ block, }: { block: Blocktype }) => {
                         <div className='rounded-[3px]  h-[17px] w-[18px] bg-radio  shadow-checkbox p-2 text-xs font-bold text-shadow-xl flex items-center justify-center text-white '>{block.letter}</div>
                         <div
                             data-placeholder="Input"
+
                             contentEditable="true"
                             suppressContentEditableWarning
                             className={cn(
