@@ -23,33 +23,81 @@ export const Block = ({ block, }: { block: Blocktype }) => {
         ]
         setBlocks(newBlocks)
         setFocusId(newBlock.id)
+        requestAnimationFrame(() => {
+            const focusId = newBlock.id
+
+            if (focusId) {
+                console.log('setting focus')
+                let div = document.getElementById(focusId)
+                if (div && !div.isContentEditable) {
+                    const editable = div.querySelector('[contenteditable="true"]') as HTMLElement;
+                    if (editable) div = editable;
+                }
+
+                if (div) {
+                    div.focus()
+                    const range = document.createRange()
+                    range.selectNodeContents(div)
+
+                    const sel = window.getSelection()
+                    sel?.removeAllRanges()
+                    sel?.addRange(range)
+                    setFocusId(null)
+                }
+            }
+        })
     }
 
+    // useEffect(() => {
+    //     console.log("running")
+    //     console.log(focusId)
+    //     if (focusId) {
+    //         console.log('setting focus')
+    //         let div = document.getElementById(focusId)
+    //         if (div && !div.isContentEditable) {
+    //             const editable = div.querySelector('[contenteditable="true"]') as HTMLElement;
+    //             if (editable) div = editable;
+    //         }
+
+    //         if (div) {
+    //             div.focus()
+    //             const range = document.createRange()
+    //             range.selectNodeContents(div)
+
+    //             const sel = window.getSelection()
+    //             sel?.removeAllRanges()
+    //             sel?.addRange(range)
+    //             setFocusId(null)
+    //         }
+    //     }
+    // }, [focusId])
+
     useEffect(() => {
-        console.log("running")
-        if (focusId) {
-            console.log('setting focus')
-            let div = document.getElementById(focusId)
-            if (div && !div.isContentEditable) {
-                const editable = div.querySelector('[contenteditable="true"]') as HTMLElement;
-                if (editable) div = editable;
+        const handler = () => {
+            const selection = document.getSelection();
+            if (!selection || !selection.anchorNode) return;
 
+            const blockDiv = (selection.anchorNode as HTMLElement).closest("[data-block-id]");
+            if (blockDiv) {
+                setFocusId(blockDiv.getAttribute("data-block-id")!);
+            } else {
+                setFocusId(null); // caret moved outside
             }
+        };
 
-            if (div) {
-                div.focus()
-                const range = document.createRange()
-                range.selectNodeContents(div)
-                range.collapse(false)
-                const sel = window.getSelection()
-                sel?.removeAllRanges()
-                sel?.addRange(range)
-                setFocusId(null)
-            }
-        }
-    }, [focusId])
+        document.addEventListener("selectionchange", handler);
+        return () => document.removeEventListener("selectionchange", handler);
+    }, []);
+    function isCaretInChexbox() {
+        console.log('carted in chechbox', focusId)
+        if (!focusId) return false;
+        console.log('carted in chechbox', focusId)
+        const focusBlock = blocks.find(b => b.id === focusId)
+        if (focusBlock?.type === "checkbox-group") return true
+        if (focusBlock?.type === "checkbox-option") return true
 
-
+        return false
+    }
     function isCaretAtStart() {
         const selection = window.getSelection();
         if (!selection || selection.rangeCount === 0) return false
@@ -80,8 +128,6 @@ export const Block = ({ block, }: { block: Blocktype }) => {
         sel?.addRange(range)
     }
     const handleKeyDown = ({ e, type, blockId }: { e: React.KeyboardEvent<HTMLDivElement>, type: string, blockId: string }) => {
-
-
         if (e.key == "Enter") {
             e.preventDefault()
             handleEnter({ id: block.id })
@@ -156,13 +202,10 @@ export const Block = ({ block, }: { block: Blocktype }) => {
         setBlocks(newBlocks);
     }
     const handleInput = (e: React.KeyboardEvent<HTMLDivElement>) => {
-
         const value = e.currentTarget.textContent || "";
         if (value === "") {
             e.currentTarget.textContent = "";
         }
-
-
         if (!value.includes("/")) {
             setIsOpen(false);
         }
@@ -200,7 +243,7 @@ export const Block = ({ block, }: { block: Blocktype }) => {
         case "text":
             return (
                 <div id={block.id} contentEditable={'true'}
-
+                    data-block-id={block.id}
                     onKeyDown={(e) => handleKeyDown({ e, type: block.type, blockId: block.id })}
                     data-placeholder={block.label}
                     onInput={handleInput}
@@ -211,12 +254,11 @@ export const Block = ({ block, }: { block: Blocktype }) => {
                     )}>{block.content as string}</div>
             )
         case "input":
-
             return (
 
                 <div
                     id={block.id}
-
+                    data-block-id={block.id}
                     data-placeholder={block.label}
                     contentEditable={'true'}
                     suppressContentEditableWarning
@@ -238,6 +280,8 @@ export const Block = ({ block, }: { block: Blocktype }) => {
                     {
                         options.map((opt, idx) => (
                             <div id={opt.id}
+                                data-block-id={block.id}
+                                onClick={() => setFocusId(opt.id)}
                                 onKeyDown={(e) => handleKeyDown({ e, type: opt.type, blockId: opt.id })}
                                 className='flex items-center gap-2'>
                                 <div className='rounded-[3px]  h-[17px] w-[18px] bg-white  shadow-checkbox'></div>
@@ -250,7 +294,8 @@ export const Block = ({ block, }: { block: Blocktype }) => {
                                     )} >{opt.value}</div>
                             </div>
                         ))}
-                    < div
+                    {isCaretInChexbox() && <div
+
                         className='flex items-center gap-2 opacity-20 cursor-pointer hover:opacity-80 ' >
                         <div className='rounded-[3px]  h-[17px] w-[18px] bg-white  shadow-checkbox'></div>
                         <div
@@ -260,13 +305,12 @@ export const Block = ({ block, }: { block: Blocktype }) => {
                             className={cn(
                                 "w-full h-full text-sm  focus:outline-none py-1 font-normal "
                             )} >Add Option</div>
-                    </div >
-
-
+                    </div >}
                 </>
             )
         case "paragraph":
             return (<div id={block.id} contentEditable={'true'}
+                data-block-id={block.id}
                 onKeyDown={(e) => handleKeyDown({ e, type: block.type, blockId: block.id })}
                 data-placeholder={block.label}
                 onInput={handleInput}
@@ -280,7 +324,7 @@ export const Block = ({ block, }: { block: Blocktype }) => {
         case "radio":
             return (
                 <div
-                    id={block.id} className=" flex flex-col px-1 gap-3  ">
+                    id={block.id} data-block-id={block.id} className=" flex flex-col px-1 gap-3  ">
                     <div
                         onKeyDown={(e) => handleKeyDown({ e, type: block.type, blockId: block.id })}
                         className='flex items-center gap-2 max-w-fit rounded-lg shadow-checkbox px-3 '>
