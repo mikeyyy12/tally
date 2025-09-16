@@ -54,7 +54,9 @@ export const Block = ({ block, }: { block: Blocktype }) => {
             if (!selection || !selection.anchorNode) return;
 
             let node: Node | null = selection.anchorNode;
-
+            if (node.nodeType === Node.TEXT_NODE) {
+                node = node.parentElement;
+            }
             if (node instanceof HTMLElement) {
                 const blockDiv = node.closest<HTMLElement>("[data-block-id]");
                 if (blockDiv) {
@@ -153,6 +155,7 @@ export const Block = ({ block, }: { block: Blocktype }) => {
         }
 
     }
+
     const handleAddOption = (groupId: string) => {
         console.log('handleAddOption called for', groupId);
         setBlocks(prevBlocks => {
@@ -164,7 +167,7 @@ export const Block = ({ block, }: { block: Blocktype }) => {
                 type: "checkbox-option",
                 parentId: groupId,
                 label: `Option ${options.length + 1}`,
-                // add value property if your UI expects it:
+
                 value: ""
             };
 
@@ -291,12 +294,13 @@ export const Block = ({ block, }: { block: Blocktype }) => {
                         options.map((opt, idx) => (
                             <div
                                 key={opt.id}
-                                id={opt.id}
-                                data-block-id={opt.id}
-                                onClick={() => setFocusId(opt.id)}
                                 className='flex items-center gap-2'>
                                 <div className='rounded-[3px]  h-[17px] w-[18px] bg-white  shadow-checkbox'></div>
                                 <div
+
+                                    id={opt.id}
+                                    data-block-id={opt.id}
+                                    onClick={() => setFocusId(opt.id)}
                                     onInput={handleInput}
                                     onKeyDown={(e) => handleKeyDown({ e, type: opt.type, blockId: opt.id })}
                                     suppressContentEditableWarning
