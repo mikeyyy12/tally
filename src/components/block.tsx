@@ -363,12 +363,14 @@ export const Block = ({ block, }: { block: Blocktype }) => {
         case "radio":
             return (
                 <div
-                    id={block.id} data-block-id={block.id} className=" flex flex-col px-1 gap-3  ">
+                    className=" flex flex-col px-1 gap-3  ">
                     <div
-                        onKeyDown={(e) => handleKeyDown({ e, type: block.type, blockId: block.id })}
+
                         className='flex items-center gap-2 max-w-fit rounded-lg shadow-checkbox px-3 '>
                         <div className='rounded-[3px]  h-[17px] w-[18px] bg-radio  shadow-checkbox p-2 text-xs font-bold text-shadow-xl flex items-center justify-center text-white '>{block.letter}</div>
                         <div
+                            id={block.id} data-block-id={block.id}
+                            onKeyDown={(e) => handleKeyDown({ e, type: block.type, blockId: block.id })}
                             data-placeholder="Input"
                             contentEditable="true"
                             suppressContentEditableWarning
