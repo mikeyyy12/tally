@@ -92,25 +92,29 @@ export const Block = ({ block, }: { block: Blocktype }) => {
         if (!selection || selection.rangeCount === 0) return false;
         const range = selection.getRangeAt(0);
         const textLength = div.innerText.length;
+        console.log('textlen', textLength, range.endOffset, range)
         return range.endOffset === textLength;
     }
 
 
     function focusBlock(div: HTMLDivElement, atStart: boolean) {
         console.log("inside focus", div)
-        div.focus();
+        requestAnimationFrame(() => {
+            div.focus();
 
-        const range = document.createRange()
-        if (atStart) {
-            const firstChild = div.firstChild || div;
-            range.setStart(firstChild, 0)
-        } else {
-            range.selectNodeContents(div)
-            range.collapse(false)
-        }
-        const sel = window.getSelection();
-        sel?.removeAllRanges()
-        sel?.addRange(range)
+            const range = document.createRange()
+            if (atStart) {
+                const firstChild = div.firstChild || div;
+                range.setStart(firstChild, 0)
+                range.collapse(true);
+            } else {
+                range.selectNodeContents(div)
+                range.collapse(false)
+            }
+            const sel = window.getSelection();
+            sel?.removeAllRanges()
+            sel?.addRange(range)
+        })
     }
     const handleKeyDown = ({ e, type, blockId }: { e: React.KeyboardEvent<HTMLDivElement>, type: string, blockId: string }) => {
         if (e.key == "Enter") {
@@ -139,23 +143,26 @@ export const Block = ({ block, }: { block: Blocktype }) => {
         }
 
         else if (e.key === "ArrowDown") {
-            const div = document.getElementById(blockId)
-            if (isCaretAtEnd(div as HTMLDivElement)) {
-                const index = blocks.findIndex((b) => b.id == blockId)
-                let nextIdx = index + 1;
-                while (nextIdx <= blocks.length && blocks[nextIdx].type === "checkbox-group") {
-                    nextIdx++;
-                    console.log("stuck")
-                }
+            requestAnimationFrame(() => {
+                const div = document.getElementById(blockId);
+                if (!div) return
+                if (isCaretAtEnd(div as HTMLDivElement)) {
+                    const index = blocks.findIndex((b) => b.id == blockId);
+                    let nextIdx = index + 1;
 
-                e.preventDefault();
+                    while (nextIdx < blocks.length && blocks[nextIdx].type === "checkbox-group") {
+                        nextIdx++;
+                    }
 
-                if (nextIdx <= blocks.length) {
-                    const nextDiv = document.getElementById(blocks[nextIdx].id);
-                    if (nextDiv) focusBlock(nextDiv as HTMLDivElement, false);
+                    if (nextIdx < blocks.length) {
+                        const nextDiv = document.getElementById(blocks[nextIdx].id);
+                        if (nextDiv) focusBlock(nextDiv as HTMLDivElement, false);
+                    }
                 }
-            }
+            });
         }
+
+
         else if (e.key === "/" && type == "paragraph") {
             setCurrentId(block.id)
             requestAnimationFrame(() => {
