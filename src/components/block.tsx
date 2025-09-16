@@ -168,7 +168,6 @@ export const Block = ({ block, }: { block: Blocktype }) => {
                         nextIdx++;
                     }
 
-
                     if (nextIdx < blocks.length) {
                         const nextDiv = document.getElementById(blocks[nextIdx].id);
                         if (nextDiv) focusBlock(nextDiv as HTMLDivElement, false);
@@ -194,62 +193,119 @@ export const Block = ({ block, }: { block: Blocktype }) => {
 
     }
 
-    const handleAddOption = (groupId: string) => {
-        console.log('handleAddOption called for', groupId);
-        setBlocks(prevBlocks => {
-            const options = prevBlocks.filter(
-                b => b.type === "checkbox-option" && b.parentId === groupId
-            );
-            const newOption: CheckboxBlock = {
-                id: uuidv4(),
-                type: "checkbox-option",
-                parentId: groupId,
-                label: `Option ${options.length + 1}`,
+    const handleAddOption = (groupId: string, type: string) => {
+        console.log('handleAddOption called for', groupId, type);
+        if (type === "checkbox-option") {
+            console.log('inside checbox')
+            setBlocks(prevBlocks => {
+                console.log("insde ran")
+                const options = prevBlocks.filter(
+                    b => b.type === "checkbox-option" && b.parentId === groupId
+                );
+                const newOption: CheckboxBlock = {
+                    id: uuidv4(),
+                    type: "checkbox-option",
+                    parentId: groupId,
+                    label: `Option ${options.length + 1}`,
+                    value: ""
+                };
 
-                value: ""
-            };
+                const lastIndex = (() => {
+                    let last = -1;
+                    prevBlocks.forEach((b, idx) => {
+                        if (b.type === "checkbox-option" && b.parentId === groupId) {
+                            last = idx;
+                        }
+                    });
+                    return last;
+                })()
+                console.log("insde")
+                const insertIndex = lastIndex >= 0 ? lastIndex + 1 : prevBlocks.findIndex(b => b.id === groupId) + 1;
+                console.log('insertedindex', insertIndex, lastIndex, 'last')
+                const newBlocks = [
+                    ...prevBlocks.slice(0, insertIndex),
+                    newOption,
+                    ...prevBlocks.slice(insertIndex),
+                ];
 
-            const lastIndex = (() => {
-                let last = -1;
-                prevBlocks.forEach((b, idx) => {
-                    if (b.type === "checkbox-option" && b.parentId === groupId) {
-                        last = idx;
+                requestAnimationFrame(() => {
+                    // update focusId and focus DOM
+                    setFocusId(newOption.id);
+                    const el = document.getElementById(newOption.id);
+                    let target: HTMLElement | null = el as HTMLElement | null;
+                    if (target && !target.isContentEditable) {
+                        const edit = target.querySelector<HTMLElement>('[contenteditable="true"]');
+                        if (edit) target = edit;
+                    }
+                    if (target) {
+                        target.focus();
+                        const range = document.createRange();
+                        range.selectNodeContents(target);
+                        range.collapse(false);
+                        const sel = window.getSelection();
+                        sel?.removeAllRanges();
+                        sel?.addRange(range);
                     }
                 });
-                return last;
-            })();
 
-            const insertIndex = lastIndex >= 0 ? lastIndex + 1 : prevBlocks.findIndex(b => b.id === groupId) + 1;
-
-            const newBlocks = [
-                ...prevBlocks.slice(0, insertIndex),
-                newOption,
-                ...prevBlocks.slice(insertIndex),
-            ];
-
-            // schedule focus after DOM update
-            requestAnimationFrame(() => {
-                // update focusId and focus DOM
-                setFocusId(newOption.id);
-                const el = document.getElementById(newOption.id);
-                let target: HTMLElement | null = el as HTMLElement | null;
-                if (target && !target.isContentEditable) {
-                    const edit = target.querySelector<HTMLElement>('[contenteditable="true"]');
-                    if (edit) target = edit;
-                }
-                if (target) {
-                    target.focus();
-                    const range = document.createRange();
-                    range.selectNodeContents(target);
-                    range.collapse(false);
-                    const sel = window.getSelection();
-                    sel?.removeAllRanges();
-                    sel?.addRange(range);
-                }
+                return newBlocks;
             });
+        }
 
-            return newBlocks;
-        });
+        else if (type == "multipleChoice-option") {
+            setBlocks(prevBlocks => {
+                const mcq = prevBlocks.filter(
+                    b => b.type == "multipleChoice-option" && b.parentId === groupId
+                )
+                const length = mcq.length;
+                const letter = String.fromCharCode(65 + length);
+                const newMcq: MultipleChoiceOption = {
+                    id: uuidv4(),
+                    type: "multipleChoice-option",
+                    parentId: groupId,
+                    letter: letter,
+                    value: 'Choice'
+                }
+                const lastIndex = (() => {
+                    let last = -1;
+                    prevBlocks.forEach((b, idx) => {
+                        if (b.type === "multipleChoice-option" && b.parentId === groupId) {
+                            last = idx
+                        }
+                    })
+                    return last
+                })()
+
+                const insertIndex = lastIndex >= 0 ? lastIndex + 1 : prevBlocks.findIndex((b) => b.id === groupId) + 1;
+
+                const newBlocks = [
+                    ...prevBlocks.slice(0, insertIndex),
+                    newMcq,
+                    ...prevBlocks.slice(insertIndex)
+                ]
+
+                requestAnimationFrame(() => {
+                    setFocusId(newMcq.id)
+                    const el = document.getElementById(newMcq.id)
+                    let target: HTMLElement | null = el as HTMLElement | null;
+                    if (target && !target.isContentEditable) {
+                        const edit = target.querySelector<HTMLElement>('[contenteditable="true"]');
+                        if (edit) target = edit
+                    }
+                    if (target) {
+                        target.focus()
+                        const range = document.createRange()
+                        range.selectNodeContents(target)
+                        range.collapse(true)
+                        const sel = window.getSelection()
+                        sel?.removeAllRanges()
+                        sel?.addRange(range)
+
+                    }
+                })
+                return newBlocks
+            })
+        }
     };
 
     const handleInput = (e: React.KeyboardEvent<HTMLDivElement>) => {
@@ -328,34 +384,31 @@ export const Block = ({ block, }: { block: Blocktype }) => {
                 .sort((a, b) => blocks.indexOf(a) - blocks.indexOf(b));
             return (
                 <>
-                    {
-                        options.map((opt, idx) => (
+                    {options.map((opt, idx) => (
+                        <div
+                            key={opt.id}
+                            className='flex items-center gap-2'>
+                            <div className='rounded-[3px]  h-[17px] w-[18px] bg-white  shadow-checkbox'></div>
                             <div
-                                key={opt.id}
-                                className='flex items-center gap-2'>
-                                <div className='rounded-[3px]  h-[17px] w-[18px] bg-white  shadow-checkbox'></div>
-                                <div
-
-                                    id={opt.id}
-                                    data-block-id={opt.id}
-                                    onClick={() => setFocusId(opt.id)}
-                                    onInput={handleInput}
-                                    onKeyDown={(e) => handleKeyDown({ e, type: opt.type, blockId: opt.id })}
-                                    suppressContentEditableWarning
-                                    data-placeholder={opt.label}
-                                    contentEditable="true"
-                                    className={cn("[&:empty]:before:content-[attr(data-placeholder)]  [&:empty]:before:text-neutral-400",
-                                        "w-full h-full text-sm  focus:outline-none py-px font-normal"
-                                    )} >{opt.value}</div>
-                            </div>
-                        ))}
+                                id={opt.id}
+                                data-block-id={opt.id}
+                                onMouseDown={() => setFocusId(opt.id)}
+                                onInput={handleInput}
+                                onKeyDown={(e) => handleKeyDown({ e, type: opt.type, blockId: opt.id })}
+                                suppressContentEditableWarning
+                                data-placeholder={opt.label}
+                                contentEditable="true"
+                                className={cn("[&:empty]:before:content-[attr(data-placeholder)]  [&:empty]:before:text-neutral-400",
+                                    "w-full h-full text-sm  focus:outline-none py-px font-normal"
+                                )} >{opt.value}</div>
+                        </div>
+                    ))}
                     {isCaretInChexbox() && <div
                         className='flex items-center gap-2 opacity-20 cursor-pointer hover:opacity-80 ' >
                         <div className='rounded-[3px]  h-[17px] w-[18px] bg-white  shadow-checkbox'></div>
-                        <div
-                            onMouseDown={() => {
-                                handleAddOption(block.id)
-                            }}
+                        <div onMouseDown={(e) => {
+                            handleAddOption(block.id, "checkbox-option")
+                        }}
                             className={cn(
                                 "w-full h-full text-sm  focus:outline-none py-1 font-normal "
                             )} >Add Option</div>
@@ -365,6 +418,7 @@ export const Block = ({ block, }: { block: Blocktype }) => {
         case "multipleChoice-group":
             const mcqOptions = blocks.filter((b): b is MultipleChoiceOption => b.type === "multipleChoice-option" && b.parentId == block.id)
                 .sort((a, b) => blocks.indexOf(a) - blocks.indexOf(b))
+            const nextLetter = String.fromCharCode(65 + mcqOptions.length);
             return (
                 <>
                     {mcqOptions.map((mcq, idx) => (
@@ -384,17 +438,18 @@ export const Block = ({ block, }: { block: Blocktype }) => {
                             </div>
                         </div>
                     ))}
-                    {isCaretInMcq() && <div className=" flex flex-col px-1 gap-3  ">
+                    {isCaretInMcq() && <div className="flex flex-col px-1 gap-3">
                         <div
                             className='flex items-center gap-2 max-w-fit rounded-lg shadow-checkbox px-3 opacity-20 hover:opacity-80  cursor-pointer'>
-                            <div className='rounded-[3px]  h-[17px] w-[18px] bg-radio  shadow-checkbox p-2 text-xs font-bold text-shadow-xl flex items-center justify-center text-white '>C</div>
+                            <div className='rounded-[3px]  h-[17px] w-[18px] bg-radio  shadow-checkbox p-2 text-xs font-bold text-shadow-xl flex items-center justify-center text-white '>{nextLetter}</div>
                             <div
                                 data-placeholder="Input"
                                 contentEditable="true"
                                 suppressContentEditableWarning
+                                onMouseDown={() => handleAddOption(block.id, "multipleChoice-option")}
                                 className={cn(
                                     "w-full h-full text-sm  focus:outline-none py-2 font-normal text-neutral-800"
-                                )} >Add Ques</div>
+                                )} >Add Choice</div>
                         </div>
                     </div>}
                 </>
