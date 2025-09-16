@@ -22,8 +22,9 @@ const intialBlock = [
   { type: "checkbox-group", id: "121", label: "What's your name?", },
   { type: "checkbox-option", id: "1213", parentId: "121", value: "shubham", },
   { type: "checkbox-option", id: "1214", parentId: "121", value: "nine" },
-  { type: "radio", id: "122", letter: "A", value: "nice" },
-  { type: "radio", id: "1232", letter: "B", value: "not nice" }
+  { type: "multipleChoice-group", id: "1215", label: "What's your name?", },
+  { type: "multipleChoice-option", id: "122", letter: "A", parentId: "1215", value: "nice" },
+  { type: "multipleChoice-option", id: "1232", letter: "B", parentId: "1215", value: "not nice" }
 ]
 export const BlocksContext = createContext<BlocksContextType | undefined>(undefined)
 

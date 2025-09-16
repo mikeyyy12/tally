@@ -2,7 +2,7 @@
 import { BlocksContext } from '@/context/context';
 
 import { cn } from '@/utils/cn';
-import { Blocktype, CheckboxBlock } from '@/utils/type';
+import { Blocktype, CheckboxBlock, MultipleChoiceOption } from '@/utils/type';
 import React, { useContext, useEffect, useState } from 'react'
 import { v4 as uuidv4 } from 'uuid';
 
@@ -77,6 +77,14 @@ export const Block = ({ block, }: { block: Blocktype }) => {
         const focusBlock = blocks.find(b => b.id === focusId)
         if (focusBlock?.type === "checkbox-group") return true
         if (focusBlock?.type === "checkbox-option") return true
+
+        return false
+    }
+    function isCaretInMcq() {
+        if (!focusId) return false;
+        const focusBlock = blocks.find(b => b.id === focusId)
+        if (focusBlock?.type === "multipleChoice-group") return true
+        if (focusBlock?.type === "multipleChoice-option") return true
 
         return false
     }
@@ -335,7 +343,6 @@ export const Block = ({ block, }: { block: Blocktype }) => {
                             </div>
                         ))}
                     {isCaretInChexbox() && <div
-
                         className='flex items-center gap-2 opacity-20 cursor-pointer hover:opacity-80 ' >
                         <div className='rounded-[3px]  h-[17px] w-[18px] bg-white  shadow-checkbox'></div>
                         <div
@@ -346,6 +353,43 @@ export const Block = ({ block, }: { block: Blocktype }) => {
                                 "w-full h-full text-sm  focus:outline-none py-1 font-normal "
                             )} >Add Option</div>
                     </div >}
+                </>
+            )
+        case "multipleChoice-group":
+            const mcqOptions = blocks.filter((b): b is MultipleChoiceOption => b.type === "multipleChoice-option" && b.parentId == block.id)
+                .sort((a, b) => blocks.indexOf(a) - blocks.indexOf(b))
+            return (
+                <>
+                    {mcqOptions.map((mcq, idx) => (
+                        <div className=" flex flex-col px-1 gap-3  ">
+                            <div
+                                className='flex items-center gap-2 max-w-fit rounded-lg shadow-checkbox px-3 '>
+                                <div className='rounded-[3px]  h-[17px] w-[18px] bg-radio  shadow-checkbox p-2 text-xs font-bold text-shadow-xl flex items-center justify-center text-white '>{mcq.letter}</div>
+                                <div
+                                    id={mcq.id} data-block-id={mcq.id}
+                                    onKeyDown={(e) => handleKeyDown({ e, type: mcq.type, blockId: mcq.id })}
+                                    data-placeholder="Input"
+                                    contentEditable="true"
+                                    suppressContentEditableWarning
+                                    className={cn(
+                                        "w-full h-full text-sm  focus:outline-none py-2 font-normal text-neutral-800"
+                                    )} >{mcq.value}</div>
+                            </div>
+                        </div>
+                    ))}
+                    {isCaretInMcq() && <div className=" flex flex-col px-1 gap-3  ">
+                        <div
+                            className='flex items-center gap-2 max-w-fit rounded-lg shadow-checkbox px-3 opacity-20 hover:opacity-80  cursor-pointer'>
+                            <div className='rounded-[3px]  h-[17px] w-[18px] bg-radio  shadow-checkbox p-2 text-xs font-bold text-shadow-xl flex items-center justify-center text-white '>C</div>
+                            <div
+                                data-placeholder="Input"
+                                contentEditable="true"
+                                suppressContentEditableWarning
+                                className={cn(
+                                    "w-full h-full text-sm  focus:outline-none py-2 font-normal text-neutral-800"
+                                )} >Add Ques</div>
+                        </div>
+                    </div>}
                 </>
             )
         case "paragraph":
@@ -360,26 +404,7 @@ export const Block = ({ block, }: { block: Blocktype }) => {
                     "whitespace-nowrap overflow-x-auto overflow-y-hidden scrollbar-hide"
                 )}></div>
             )
-        case "radio":
-            return (
-                <div
-                    className=" flex flex-col px-1 gap-3  ">
-                    <div
 
-                        className='flex items-center gap-2 max-w-fit rounded-lg shadow-checkbox px-3 '>
-                        <div className='rounded-[3px]  h-[17px] w-[18px] bg-radio  shadow-checkbox p-2 text-xs font-bold text-shadow-xl flex items-center justify-center text-white '>{block.letter}</div>
-                        <div
-                            id={block.id} data-block-id={block.id}
-                            onKeyDown={(e) => handleKeyDown({ e, type: block.type, blockId: block.id })}
-                            data-placeholder="Input"
-                            contentEditable="true"
-                            suppressContentEditableWarning
-                            className={cn(
-                                "w-full h-full text-sm  focus:outline-none py-2 font-normal text-neutral-800"
-                            )} >{block.value}</div>
-                    </div>
-                </div>
-            )
 
     }
 }

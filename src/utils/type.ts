@@ -5,7 +5,8 @@ export interface RadioOption {
 
 interface BlockBase {
   id: string;
-  type: "text" | "input" | "checkbox" | "radio" | "textarea" | "paragraph" |  "checkbox-group" | "checkbox-option";
+  type: "text" | "input" | "checkbox" | "radio" | "textarea" | "paragraph" |  "checkbox-group" | "checkbox-option"
+| "multipleChoice-option" | "multipleChoice-group";
 }
 
 interface TextBlock extends BlockBase {
@@ -33,7 +34,20 @@ interface CheckBoxGroup extends BlockBase{
   required?:boolean
 
 }
+interface MultipleChoiceGroup extends BlockBase{
+  type:"multipleChoice-group",
+  label?:string;
+  required?:string;
+}
 
+export interface MultipleChoiceOption extends BlockBase{
+  type:"multipleChoice-option",
+  label?:string;
+  value?:string;
+  parentId:string
+    letter?:string;
+  required?:string;
+}
 export interface CheckboxBlock extends BlockBase {
   type: "checkbox-option";
    label?:string
@@ -54,4 +68,4 @@ interface Paragraph extends BlockBase{
   label:string;
 }
 
-export type Blocktype = TextBlock | InputBlock | CheckboxBlock | RadioBlock | Paragraph | CheckBoxGroup;
+export type Blocktype = TextBlock | InputBlock | CheckboxBlock | RadioBlock | Paragraph | CheckBoxGroup | MultipleChoiceGroup | MultipleChoiceOption;
