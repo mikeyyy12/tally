@@ -133,16 +133,19 @@ export const Block = ({ block, }: { block: Blocktype }) => {
             handleBackspace({ e, id: block.id })
         }
         else if (e.key === "ArrowUp") {
+            console.log('a up', isCaretAtStart())
             if (isCaretAtStart()) {
 
                 const index = blocks.findIndex((b) => b.id === blockId);
                 if (index <= 0) return;
                 let prevIndex = index - 1;
-
+                console.log('p idx', prevIndex, blocks)
                 while (prevIndex >= 0 && blocks[prevIndex].type === "checkbox-group") {
                     prevIndex--;
                 }
-
+                while (prevIndex >= 0 && blocks[prevIndex].type === "multipleChoice-group") {
+                    prevIndex--;
+                }
                 if (prevIndex >= 0) {
                     const prevDiv = document.getElementById(blocks[prevIndex].id);
                     if (prevDiv) focusBlock(prevDiv as HTMLDivElement, false);
@@ -161,6 +164,10 @@ export const Block = ({ block, }: { block: Blocktype }) => {
                     while (nextIdx < blocks.length && blocks[nextIdx].type === "checkbox-group") {
                         nextIdx++;
                     }
+                    while (nextIdx < blocks.length && blocks[nextIdx].type === "multipleChoice-group") {
+                        nextIdx++;
+                    }
+
 
                     if (nextIdx < blocks.length) {
                         const nextDiv = document.getElementById(blocks[nextIdx].id);
