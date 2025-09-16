@@ -97,6 +97,7 @@ export const Block = ({ block, }: { block: Blocktype }) => {
 
 
     function focusBlock(div: HTMLDivElement, atStart: boolean) {
+        console.log("inside focus", div)
         div.focus();
 
         const range = document.createRange()
@@ -120,24 +121,39 @@ export const Block = ({ block, }: { block: Blocktype }) => {
             handleBackspace({ e, id: block.id })
         }
         else if (e.key === "ArrowUp") {
-            // e.preventDefault()
             if (isCaretAtStart()) {
-                const index = blocks.findIndex((b) => b.id == blockId)
-                const prevDivId = blocks[index - 1].id
-                e.preventDefault();
-                const prevDiv = document.getElementById(prevDivId)
-                if (prevDiv) focusBlock(prevDiv as HTMLDivElement, false)
+
+                const index = blocks.findIndex((b) => b.id === blockId);
+                if (index <= 0) return;
+                let prevIndex = index - 1;
+
+                while (prevIndex >= 0 && blocks[prevIndex].type === "checkbox-group") {
+                    prevIndex--;
+                }
+
+                if (prevIndex >= 0) {
+                    const prevDiv = document.getElementById(blocks[prevIndex].id);
+                    if (prevDiv) focusBlock(prevDiv as HTMLDivElement, false);
+                }
             }
         }
+
         else if (e.key === "ArrowDown") {
             const div = document.getElementById(blockId)
             if (isCaretAtEnd(div as HTMLDivElement)) {
                 const index = blocks.findIndex((b) => b.id == blockId)
-                const nextId = blocks[index + 1].id
+                let nextIdx = index + 1;
+                while (nextIdx <= blocks.length && blocks[nextIdx].type === "checkbox-group") {
+                    nextIdx++;
+                    console.log("stuck")
+                }
+
                 e.preventDefault();
 
-                const nextDiv = document.getElementById(nextId)
-                if (nextDiv) focusBlock(nextDiv as HTMLDivElement, true)
+                if (nextIdx <= blocks.length) {
+                    const nextDiv = document.getElementById(blocks[nextIdx].id);
+                    if (nextDiv) focusBlock(nextDiv as HTMLDivElement, false);
+                }
             }
         }
         else if (e.key === "/" && type == "paragraph") {
