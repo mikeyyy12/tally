@@ -88,25 +88,36 @@ export const Block = ({ block, }: { block: Blocktype }) => {
 
         return false
     }
-    function isCaretAtStart() {
-        const selection = window.getSelection();
-        if (!selection || selection.rangeCount === 0) return false
-        const range = selection?.getRangeAt(0)
-        return range?.startOffset == 0 && range?.endOffset == 0
-    }
 
     function getCaretRect() {
         const sel = window.getSelection();
         if (!sel || sel.rangeCount === 0) return null;
+
         const range = sel.getRangeAt(0).cloneRange();
         range.collapse(true);
-        const rect = range.getClientRects();
-        return rect.length > 0 ? rect[0] : null
+
+
+        const rects = range.getClientRects();
+        if (rects.length > 0) {
+            return rects[0];
+        }
+
+        const marker = document.createElement("span");
+        marker.textContent = "\u200b";
+        range.insertNode(marker);
+
+        const rect = marker.getBoundingClientRect();
+        const parent = marker.parentNode;
+        if (parent) parent.removeChild(marker);
+        console.log(rect)
+        return rect;
     }
 
     function placeCaretAtX(targetIdx: number, targetX: number) {
         console.log('ran', targetIdx, targetX)
         const el = document.getElementById(blocks[targetIdx].id) as HTMLDivElement;
+
+        console.log(blocks[targetIdx].id)
         el?.focus();
 
         const range = document.createRange()
@@ -115,45 +126,35 @@ export const Block = ({ block, }: { block: Blocktype }) => {
 
         type Best = { node: Node | null; offset: number; dist: number };
         let best: Best = { node: null, offset: 0, dist: Infinity };
-
-        const walker = document.createTreeWalker(el as HTMLDivElement, NodeFilter.SHOW_TEXT, null)
+        console.log(el)
+        const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT, null);
         while (walker.nextNode()) {
             const node = walker.currentNode;
-            const text = node.textContent || ""
+            const text = node.textContent || "";
 
-            for (let i = 0; i < text.length; i++) {
-                try {
-                    range.setStart(node, i)
-                } catch (err) {
-                    continue
-                }
-                range.collapse(true)
+            if (text.length === 0) continue;
+
+            for (let i = 0; i <= text.length; i++) {
+                try { range.setStart(node, i); } catch { continue; }
+                range.collapse(true);
                 const rect = range.getClientRects()[0];
-                if (!rect) continue
-
-                const dist = Math.abs(rect.x - targetX)
-                console.log('ren n', dist, best.dist)
-                if (dist < best.dist) {
-
-                    best = { node, offset: i, dist, }
-                }
+                if (!rect) continue;
+                const dist = Math.abs(rect.x - targetX);
+                console.log('offset', i, 'rect.x', rect.x, 'dist', dist, 'bestSoFar', best.dist);
+                if (dist < best.dist) best = { node, offset: i, dist };
             }
         }
-        console.log('best', best)
-        if (!best.node) {
 
-            try {
-                range.setStart(el, 0)
-            } catch (err) {
-                if (el.firstChild) {
-                    range.setStart(el.firstChild, 0)
-                }
-            }
-            range.collapse(true)
-            sel.removeAllRanges()
-            sel.addRange(range)
-            return
+        if (!best.node || best.dist === Infinity) {
+            range.selectNodeContents(el);
+            range.collapse(false);
+            sel.removeAllRanges();
+            sel.addRange(range);
+            console.log('fallback: placed at end of block');
+            return;
         }
+
+        console.log("setting best", best.offset)
         range.setStart(best.node, best.offset)
         range.collapse(true)
         sel.removeAllRanges()
@@ -165,36 +166,9 @@ export const Block = ({ block, }: { block: Blocktype }) => {
         if (rect) setCaretX(rect.x)
     }
 
-    function isCaretAtEnd(div: HTMLElement) {
-        const selection = window.getSelection();
-        if (!selection || selection.rangeCount === 0) return false;
-        const range = selection.getRangeAt(0);
-        const textLength = div.innerText.length;
-        console.log('textlen', textLength, range.endOffset, range)
-        return range.endOffset === textLength;
-    }
 
-
-    function focusBlock(div: HTMLDivElement, atStart: boolean) {
-        console.log("inside focus", div)
-        requestAnimationFrame(() => {
-            div.focus();
-
-            const range = document.createRange()
-            if (atStart) {
-                const firstChild = div.firstChild || div;
-                range.setStart(firstChild, 0)
-                range.collapse(true);
-            } else {
-                range.selectNodeContents(div)
-                range.collapse(false)
-            }
-            const sel = window.getSelection();
-            sel?.removeAllRanges()
-            sel?.addRange(range)
-        })
-    }
     const handleKeyDown = ({ e, type, blockId }: { e: React.KeyboardEvent<HTMLDivElement>, type: string, blockId: string }) => {
+        console.log("presed", e.key)
         if (e.key == "Enter") {
             e.preventDefault()
             handleEnter({ id: block.id })
@@ -213,62 +187,33 @@ export const Block = ({ block, }: { block: Blocktype }) => {
         }
         else if (e.key === "ArrowUp" || e.key == "ArrowDown") {
 
+            console.log("helo")
             const rect = getCaretRect();
+            console.log("helorec", rect)
             if (!rect) return
             const sel = window.getSelection();
             if (!sel || sel.rangeCount == 0) return;
             const idx = blocks.findIndex((b) => b.id == blockId)
-            const targetIdx = e.key == "ArrowUp" ? idx - 1 : idx + 1
+            console.log('preesed')
+
+            let targetIdx = e.key == "ArrowUp" ? idx - 1 : idx + 1
+            if (blocks[targetIdx].type == "checkbox-group" || blocks[targetIdx].type == "multipleChoice-group") {
+                targetIdx = e.key == "ArrowUp" ? targetIdx - 1 : targetIdx + 1
+            }
+            e.preventDefault()
             console.log("targetidx", targetIdx)
-            if (targetIdx <= 0 || targetIdx >= blocks.length) return
+            if (targetIdx < 0 || targetIdx >= blocks.length) return;
 
-            const targetX = caretX ?? rect.x;
-            placeCaretAtX(targetIdx, targetX)
+
+            const currentX = rect.x;
+            const targetX = caretX ?? currentX;
+
+            placeCaretAtX(targetIdx, targetX);
+
+            // after placing caret, update caretX for the next move
             setTimeout(updateCaretXFromSelection, 0);
+
         }
-        // else if (e.key === "ArrowUp") {
-        //     console.log('a up', isCaretAtStart())
-        //     if (isCaretAtStart()) {
-
-        //         const index = blocks.findIndex((b) => b.id === blockId);
-        //         if (index <= 0) return;
-        //         let prevIndex = index - 1;
-        //         console.log('p idx', prevIndex, blocks)
-        //         while (prevIndex >= 0 && blocks[prevIndex].type === "checkbox-group") {
-        //             prevIndex--;
-        //         }
-        //         while (prevIndex >= 0 && blocks[prevIndex].type === "multipleChoice-group") {
-        //             prevIndex--;
-        //         }
-        //         if (prevIndex >= 0) {
-        //             const prevDiv = document.getElementById(blocks[prevIndex].id);
-        //             if (prevDiv) focusBlock(prevDiv as HTMLDivElement, false);
-        //         }
-        //     }
-        // }
-
-        // else if (e.key === "ArrowDown") {
-        //     requestAnimationFrame(() => {
-        //         const div = document.getElementById(blockId);
-        //         if (!div) return
-        //         if (isCaretAtEnd(div as HTMLDivElement)) {
-        //             const index = blocks.findIndex((b) => b.id == blockId);
-        //             let nextIdx = index + 1;
-
-        //             while (nextIdx < blocks.length && blocks[nextIdx].type === "checkbox-group") {
-        //                 nextIdx++;
-        //             }
-        //             while (nextIdx < blocks.length && blocks[nextIdx].type === "multipleChoice-group") {
-        //                 nextIdx++;
-        //             }
-
-        //             if (nextIdx < blocks.length) {
-        //                 const nextDiv = document.getElementById(blocks[nextIdx].id);
-        //                 if (nextDiv) focusBlock(nextDiv as HTMLDivElement, false);
-        //             }
-        //         }
-        //     });
-        // }
 
 
         else if (e.key === "/" && type == "paragraph") {
@@ -440,6 +385,15 @@ export const Block = ({ block, }: { block: Blocktype }) => {
 
         }
     }
+
+    useEffect(() => {
+        const handler = () => {
+            updateCaretXFromSelection();
+
+        };
+        document.addEventListener("selectionchange", handler);
+        return () => document.removeEventListener("selectionchange", handler);
+    }, []);
     switch (block.type) {
         case "text":
             return (
