@@ -8,7 +8,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 
 export const Block = ({ block, }: { block: Blocktype }) => {
-
+    const [caretX, setCaretX] = useState<number | null>(null)
     const context = useContext(BlocksContext)
     if (!context) throw new Error("Block context not found")
     const { blocks, setBlocks, setIsOpen, setCurrentId, focusId, setFocusId } = context;
@@ -95,6 +95,76 @@ export const Block = ({ block, }: { block: Blocktype }) => {
         return range?.startOffset == 0 && range?.endOffset == 0
     }
 
+    function getCaretRect() {
+        const sel = window.getSelection();
+        if (!sel || sel.rangeCount === 0) return null;
+        const range = sel.getRangeAt(0).cloneRange();
+        range.collapse(true);
+        const rect = range.getClientRects();
+        return rect.length > 0 ? rect[0] : null
+    }
+
+    function placeCaretAtX(targetIdx: number, targetX: number) {
+        console.log('ran', targetIdx, targetX)
+        const el = document.getElementById(blocks[targetIdx].id) as HTMLDivElement;
+        el?.focus();
+
+        const range = document.createRange()
+        const sel = window.getSelection()
+        if (!sel) return;
+
+        type Best = { node: Node | null; offset: number; dist: number };
+        let best: Best = { node: null, offset: 0, dist: Infinity };
+
+        const walker = document.createTreeWalker(el as HTMLDivElement, NodeFilter.SHOW_TEXT, null)
+        while (walker.nextNode()) {
+            const node = walker.currentNode;
+            const text = node.textContent || ""
+
+            for (let i = 0; i < text.length; i++) {
+                try {
+                    range.setStart(node, i)
+                } catch (err) {
+                    continue
+                }
+                range.collapse(true)
+                const rect = range.getClientRects()[0];
+                if (!rect) continue
+
+                const dist = Math.abs(rect.x - targetX)
+                console.log('ren n', dist, best.dist)
+                if (dist < best.dist) {
+
+                    best = { node, offset: i, dist, }
+                }
+            }
+        }
+        console.log('best', best)
+        if (!best.node) {
+
+            try {
+                range.setStart(el, 0)
+            } catch (err) {
+                if (el.firstChild) {
+                    range.setStart(el.firstChild, 0)
+                }
+            }
+            range.collapse(true)
+            sel.removeAllRanges()
+            sel.addRange(range)
+            return
+        }
+        range.setStart(best.node, best.offset)
+        range.collapse(true)
+        sel.removeAllRanges()
+        sel.addRange(range)
+    }
+
+    function updateCaretXFromSelection() {
+        const rect = getCaretRect();
+        if (rect) setCaretX(rect.x)
+    }
+
     function isCaretAtEnd(div: HTMLElement) {
         const selection = window.getSelection();
         if (!selection || selection.rangeCount === 0) return false;
@@ -132,49 +202,73 @@ export const Block = ({ block, }: { block: Blocktype }) => {
         else if (e.key == "Backspace") {
             handleBackspace({ e, id: block.id })
         }
-        else if (e.key === "ArrowUp") {
-            console.log('a up', isCaretAtStart())
-            if (isCaretAtStart()) {
+        if (
+            e.key === "ArrowLeft" ||
+            e.key === "ArrowRight" ||
+            e.key === "Home" ||
+            e.key === "End"
+        ) {
 
-                const index = blocks.findIndex((b) => b.id === blockId);
-                if (index <= 0) return;
-                let prevIndex = index - 1;
-                console.log('p idx', prevIndex, blocks)
-                while (prevIndex >= 0 && blocks[prevIndex].type === "checkbox-group") {
-                    prevIndex--;
-                }
-                while (prevIndex >= 0 && blocks[prevIndex].type === "multipleChoice-group") {
-                    prevIndex--;
-                }
-                if (prevIndex >= 0) {
-                    const prevDiv = document.getElementById(blocks[prevIndex].id);
-                    if (prevDiv) focusBlock(prevDiv as HTMLDivElement, false);
-                }
-            }
+            setTimeout(updateCaretXFromSelection, 0);
         }
+        else if (e.key === "ArrowUp" || e.key == "ArrowDown") {
 
-        else if (e.key === "ArrowDown") {
-            requestAnimationFrame(() => {
-                const div = document.getElementById(blockId);
-                if (!div) return
-                if (isCaretAtEnd(div as HTMLDivElement)) {
-                    const index = blocks.findIndex((b) => b.id == blockId);
-                    let nextIdx = index + 1;
+            const rect = getCaretRect();
+            if (!rect) return
+            const sel = window.getSelection();
+            if (!sel || sel.rangeCount == 0) return;
+            const idx = blocks.findIndex((b) => b.id == blockId)
+            const targetIdx = e.key == "ArrowUp" ? idx - 1 : idx + 1
+            console.log("targetidx", targetIdx)
+            if (targetIdx <= 0 || targetIdx >= blocks.length) return
 
-                    while (nextIdx < blocks.length && blocks[nextIdx].type === "checkbox-group") {
-                        nextIdx++;
-                    }
-                    while (nextIdx < blocks.length && blocks[nextIdx].type === "multipleChoice-group") {
-                        nextIdx++;
-                    }
-
-                    if (nextIdx < blocks.length) {
-                        const nextDiv = document.getElementById(blocks[nextIdx].id);
-                        if (nextDiv) focusBlock(nextDiv as HTMLDivElement, false);
-                    }
-                }
-            });
+            const targetX = caretX ?? rect.x;
+            placeCaretAtX(targetIdx, targetX)
+            setTimeout(updateCaretXFromSelection, 0);
         }
+        // else if (e.key === "ArrowUp") {
+        //     console.log('a up', isCaretAtStart())
+        //     if (isCaretAtStart()) {
+
+        //         const index = blocks.findIndex((b) => b.id === blockId);
+        //         if (index <= 0) return;
+        //         let prevIndex = index - 1;
+        //         console.log('p idx', prevIndex, blocks)
+        //         while (prevIndex >= 0 && blocks[prevIndex].type === "checkbox-group") {
+        //             prevIndex--;
+        //         }
+        //         while (prevIndex >= 0 && blocks[prevIndex].type === "multipleChoice-group") {
+        //             prevIndex--;
+        //         }
+        //         if (prevIndex >= 0) {
+        //             const prevDiv = document.getElementById(blocks[prevIndex].id);
+        //             if (prevDiv) focusBlock(prevDiv as HTMLDivElement, false);
+        //         }
+        //     }
+        // }
+
+        // else if (e.key === "ArrowDown") {
+        //     requestAnimationFrame(() => {
+        //         const div = document.getElementById(blockId);
+        //         if (!div) return
+        //         if (isCaretAtEnd(div as HTMLDivElement)) {
+        //             const index = blocks.findIndex((b) => b.id == blockId);
+        //             let nextIdx = index + 1;
+
+        //             while (nextIdx < blocks.length && blocks[nextIdx].type === "checkbox-group") {
+        //                 nextIdx++;
+        //             }
+        //             while (nextIdx < blocks.length && blocks[nextIdx].type === "multipleChoice-group") {
+        //                 nextIdx++;
+        //             }
+
+        //             if (nextIdx < blocks.length) {
+        //                 const nextDiv = document.getElementById(blocks[nextIdx].id);
+        //                 if (nextDiv) focusBlock(nextDiv as HTMLDivElement, false);
+        //             }
+        //         }
+        //     });
+        // }
 
 
         else if (e.key === "/" && type == "paragraph") {
