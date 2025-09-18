@@ -95,8 +95,6 @@ export const Block = ({ block, }: { block: Blocktype }) => {
 
         const range = sel.getRangeAt(0).cloneRange();
         range.collapse(true);
-
-
         const rects = range.getClientRects();
         if (rects.length > 0) {
             return rects[0];
@@ -109,15 +107,14 @@ export const Block = ({ block, }: { block: Blocktype }) => {
         const rect = marker.getBoundingClientRect();
         const parent = marker.parentNode;
         if (parent) parent.removeChild(marker);
-        console.log(rect)
+
         return rect;
     }
 
     function placeCaretAtX(targetIdx: number, targetX: number) {
-        console.log('ran', targetIdx, targetX)
         const el = document.getElementById(blocks[targetIdx].id) as HTMLDivElement;
 
-        console.log(blocks[targetIdx].id)
+
         el?.focus();
 
         const range = document.createRange()
@@ -126,7 +123,7 @@ export const Block = ({ block, }: { block: Blocktype }) => {
 
         type Best = { node: Node | null; offset: number; dist: number };
         let best: Best = { node: null, offset: 0, dist: Infinity };
-        console.log(el)
+
         const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT, null);
         while (walker.nextNode()) {
             const node = walker.currentNode;
@@ -140,8 +137,11 @@ export const Block = ({ block, }: { block: Blocktype }) => {
                 const rect = range.getClientRects()[0];
                 if (!rect) continue;
                 const dist = Math.abs(rect.x - targetX);
-                console.log('offset', i, 'rect.x', rect.x, 'dist', dist, 'bestSoFar', best.dist);
-                if (dist < best.dist) best = { node, offset: i, dist };
+
+                if (dist < best.dist) {
+                    best = { node, offset: i, dist };
+                    console.log('offset', i, 'rect.x', rect.x, 'dist', dist, 'bestSoFar', best.dist);
+                }
             }
         }
 
@@ -168,7 +168,7 @@ export const Block = ({ block, }: { block: Blocktype }) => {
 
 
     const handleKeyDown = ({ e, type, blockId }: { e: React.KeyboardEvent<HTMLDivElement>, type: string, blockId: string }) => {
-        console.log("presed", e.key)
+
         if (e.key == "Enter") {
             e.preventDefault()
             handleEnter({ id: block.id })
@@ -189,32 +189,27 @@ export const Block = ({ block, }: { block: Blocktype }) => {
 
             console.log("helo")
             const rect = getCaretRect();
-            console.log("helorec", rect)
+
             if (!rect) return
             const sel = window.getSelection();
             if (!sel || sel.rangeCount == 0) return;
             const idx = blocks.findIndex((b) => b.id == blockId)
-            console.log('preesed')
+
 
             let targetIdx = e.key == "ArrowUp" ? idx - 1 : idx + 1
             if (blocks[targetIdx].type == "checkbox-group" || blocks[targetIdx].type == "multipleChoice-group") {
                 targetIdx = e.key == "ArrowUp" ? targetIdx - 1 : targetIdx + 1
             }
             e.preventDefault()
-            console.log("targetidx", targetIdx)
             if (targetIdx < 0 || targetIdx >= blocks.length) return;
-
 
             const currentX = rect.x;
             const targetX = caretX ?? currentX;
 
             placeCaretAtX(targetIdx, targetX);
 
-            // after placing caret, update caretX for the next move
             setTimeout(updateCaretXFromSelection, 0);
-
         }
-
 
         else if (e.key === "/" && type == "paragraph") {
             setCurrentId(block.id)
@@ -229,7 +224,6 @@ export const Block = ({ block, }: { block: Blocktype }) => {
                 }
             });
         }
-
     }
 
     const handleAddOption = (groupId: string, type: string) => {
@@ -470,10 +464,9 @@ export const Block = ({ block, }: { block: Blocktype }) => {
             return (
                 <>
                     {mcqOptions.map((mcq, idx) => (
-                        <div className=" flex flex-col px-1 gap-3  ">
-                            <div
-                                className='flex items-center gap-2 max-w-fit rounded-lg shadow-checkbox px-3 '>
-                                <div className='rounded-[3px]  h-[17px] w-[18px] bg-radio  shadow-checkbox p-2 text-xs font-bold text-shadow-xl flex items-center justify-center text-white '>{mcq.letter}</div>
+                        <div className=" flex flex-col  ">
+                            <div className='flex items-center gap-1 min-w-28 w-fit max-w-full rounded-md shadow-checkbox px-2 pr-4'>
+                                <div className='rounded-[3px] h-[16px] w-[16px] bg-radio  shadow-checkbox p-2 text-xs font-bold text-shadow-xl flex items-center justify-center text-white '>{mcq.letter}</div>
                                 <div
                                     id={mcq.id} data-block-id={mcq.id}
                                     onKeyDown={(e) => handleKeyDown({ e, type: mcq.type, blockId: mcq.id })}
@@ -481,14 +474,14 @@ export const Block = ({ block, }: { block: Blocktype }) => {
                                     contentEditable="true"
                                     suppressContentEditableWarning
                                     className={cn(
-                                        "w-full h-full text-sm  focus:outline-none py-2 font-normal text-neutral-800"
+                                        " h-full w-full text-sm focus:outline-none py-[5px] font-normal text-neutral-800"
                                     )} >{mcq.value}</div>
                             </div>
                         </div>
                     ))}
-                    {isCaretInMcq() && <div className="flex flex-col px-1 gap-3">
+                    {isCaretInMcq() && <div className="flex flex-col ">
                         <div
-                            className='flex items-center gap-2 max-w-fit rounded-lg shadow-checkbox px-3 opacity-20 hover:opacity-80  cursor-pointer'>
+                            className='flex items-center gap-2 max-w-fit  rounded-lg shadow-checkbox px-3 opacity-20 hover:opacity-80  cursor-pointer'>
                             <div className='rounded-[3px]  h-[17px] w-[18px] bg-radio  shadow-checkbox p-2 text-xs font-bold text-shadow-xl flex items-center justify-center text-white '>{nextLetter}</div>
                             <div
                                 data-placeholder="Input"
@@ -497,7 +490,7 @@ export const Block = ({ block, }: { block: Blocktype }) => {
                                 onMouseDown={() => handleAddOption(block.id, "multipleChoice-option")}
                                 className={cn(
                                     "w-full h-full text-sm  focus:outline-none py-2 font-normal text-neutral-800"
-                                )} >Add Choice</div>
+                                )} >Add Option</div>
                         </div>
                     </div>}
                 </>
