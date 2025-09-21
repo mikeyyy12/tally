@@ -3,15 +3,31 @@ import { BlocksContext } from '@/context/context';
 
 import { cn } from '@/utils/cn';
 import { Blocktype, CheckboxBlock, MultipleChoiceOption } from '@/utils/type';
-import React, { useContext, useEffect, useState } from 'react'
+import React, { useContext, useEffect, useRef, useState } from 'react'
 import { v4 as uuidv4 } from 'uuid';
 
 
 export const Block = ({ block, }: { block: Blocktype }) => {
     const [caretX, setCaretX] = useState<number | null>(null)
+
     const context = useContext(BlocksContext)
     if (!context) throw new Error("Block context not found")
-    const { blocks, setBlocks, setIsOpen, setCurrentId, focusId, setFocusId } = context;
+    const { blocks, undo, setBlocksState, setBlocks, setIsOpen, setCurrentId, focusId, setFocusId } = context;
+
+
+
+    useEffect(() => {
+        const onKeyDown = (e: KeyboardEvent) => {
+            console.log()
+            if (e.ctrlKey && e.key === 'z' && !e.shiftKey) {
+                e.preventDefault();
+                undo();
+            }
+
+        };
+        document.addEventListener('keydown', onKeyDown);
+        return () => document.removeEventListener('keydown', onKeyDown);
+    }, [undo]);
 
     const handleEnter = ({ id }: { id: string }) => {
         const newBlock = { type: "paragraph" as const, id: uuidv4(), label: "Type '/' to insert block" }
@@ -21,7 +37,7 @@ export const Block = ({ block, }: { block: Blocktype }) => {
             newBlock,
             ...blocks.slice(index + 1)
         ]
-        setBlocks(newBlocks)
+        setBlocksState(newBlocks)
         setFocusId(newBlock.id)
         requestAnimationFrame(() => {
             const focusId = newBlock.id
@@ -154,7 +170,7 @@ export const Block = ({ block, }: { block: Blocktype }) => {
             return;
         }
 
-        console.log("setting best", best.offset)
+
         range.setStart(best.node, best.offset)
         range.collapse(true)
         sel.removeAllRanges()
@@ -168,6 +184,7 @@ export const Block = ({ block, }: { block: Blocktype }) => {
 
 
     const handleKeyDown = ({ e, type, blockId }: { e: React.KeyboardEvent<HTMLDivElement>, type: string, blockId: string }) => {
+
 
         if (e.key == "Enter") {
             e.preventDefault()
@@ -187,7 +204,7 @@ export const Block = ({ block, }: { block: Blocktype }) => {
         }
         else if (e.key === "ArrowUp" || e.key == "ArrowDown") {
 
-            console.log("helo")
+
             const rect = getCaretRect();
 
             if (!rect) return
@@ -224,121 +241,121 @@ export const Block = ({ block, }: { block: Blocktype }) => {
                 }
             });
         }
+
     }
 
     const handleAddOption = (groupId: string, type: string) => {
-        console.log('handleAddOption called for', groupId, type);
+
         if (type === "checkbox-option") {
-            console.log('inside checbox')
-            setBlocks(prevBlocks => {
-                console.log("insde ran")
-                const options = prevBlocks.filter(
-                    b => b.type === "checkbox-option" && b.parentId === groupId
-                );
-                const newOption: CheckboxBlock = {
-                    id: uuidv4(),
-                    type: "checkbox-option",
-                    parentId: groupId,
-                    label: `Option ${options.length + 1}`,
-                    value: ""
-                };
 
-                const lastIndex = (() => {
-                    let last = -1;
-                    prevBlocks.forEach((b, idx) => {
-                        if (b.type === "checkbox-option" && b.parentId === groupId) {
-                            last = idx;
-                        }
-                    });
-                    return last;
-                })()
-                console.log("insde")
-                const insertIndex = lastIndex >= 0 ? lastIndex + 1 : prevBlocks.findIndex(b => b.id === groupId) + 1;
-                console.log('insertedindex', insertIndex, lastIndex, 'last')
-                const newBlocks = [
-                    ...prevBlocks.slice(0, insertIndex),
-                    newOption,
-                    ...prevBlocks.slice(insertIndex),
-                ];
 
-                requestAnimationFrame(() => {
-                    // update focusId and focus DOM
-                    setFocusId(newOption.id);
-                    const el = document.getElementById(newOption.id);
-                    let target: HTMLElement | null = el as HTMLElement | null;
-                    if (target && !target.isContentEditable) {
-                        const edit = target.querySelector<HTMLElement>('[contenteditable="true"]');
-                        if (edit) target = edit;
-                    }
-                    if (target) {
-                        target.focus();
-                        const range = document.createRange();
-                        range.selectNodeContents(target);
-                        range.collapse(false);
-                        const sel = window.getSelection();
-                        sel?.removeAllRanges();
-                        sel?.addRange(range);
+
+            const options = blocks.filter(
+                b => b.type === "checkbox-option" && b.parentId === groupId
+            );
+            const newOption: CheckboxBlock = {
+                id: uuidv4(),
+                type: "checkbox-option",
+                parentId: groupId,
+                label: `Option ${options.length + 1}`,
+                value: ""
+            };
+
+            const lastIndex = (() => {
+                let last = -1;
+                blocks.forEach((b, idx) => {
+                    if (b.type === "checkbox-option" && b.parentId === groupId) {
+                        last = idx;
                     }
                 });
+                return last;
+            })()
 
-                return newBlocks;
+            const insertIndex = lastIndex >= 0 ? lastIndex + 1 : prevBlocks.findIndex(b => b.id === groupId) + 1;
+
+            const newBlocks = [
+                ...prevBlocks.slice(0, insertIndex),
+                newOption,
+                ...prevBlocks.slice(insertIndex),
+            ];
+
+            requestAnimationFrame(() => {
+                // update focusId and focus DOM
+                setFocusId(newOption.id);
+                const el = document.getElementById(newOption.id);
+                let target: HTMLElement | null = el as HTMLElement | null;
+                if (target && !target.isContentEditable) {
+                    const edit = target.querySelector<HTMLElement>('[contenteditable="true"]');
+                    if (edit) target = edit;
+                }
+                if (target) {
+                    target.focus();
+                    const range = document.createRange();
+                    range.selectNodeContents(target);
+                    range.collapse(false);
+                    const sel = window.getSelection();
+                    sel?.removeAllRanges();
+                    sel?.addRange(range);
+                }
             });
+            setBlocksState(newBlocks)
+            return newBlocks;
+
         }
 
         else if (type == "multipleChoice-option") {
-            setBlocks(prevBlocks => {
-                const mcq = prevBlocks.filter(
-                    b => b.type == "multipleChoice-option" && b.parentId === groupId
-                )
-                const length = mcq.length;
-                const letter = String.fromCharCode(65 + length);
-                const newMcq: MultipleChoiceOption = {
-                    id: uuidv4(),
-                    type: "multipleChoice-option",
-                    parentId: groupId,
-                    letter: letter,
-                    value: 'Choice'
+            const mcqOptions = blocks.filter(
+                b => b.type === "multipleChoice-option" && b.parentId === groupId
+            );
+            const length = mcqOptions.length;
+            const letter = String.fromCharCode(65 + length);
+            const newMcq: MultipleChoiceOption = {
+                id: uuidv4(),
+                type: "multipleChoice-option",
+                parentId: groupId,
+                letter: letter,
+                value: 'Choice'
+            };
+
+            const lastIndex = (() => {
+                let last = -1;
+                blocks.forEach((b, idx) => {
+                    if (b.type === "multipleChoice-option" && b.parentId === groupId) last = idx;
+                });
+                return last;
+            })();
+
+            const insertIndex = lastIndex >= 0 ? lastIndex + 1 : blocks.findIndex(b => b.id === groupId) + 1;
+
+            const newBlocks = [
+                ...blocks.slice(0, insertIndex),
+                newMcq,
+                ...blocks.slice(insertIndex)
+            ];
+
+            // Push snapshot for undo
+            setBlocksState(newBlocks);
+
+            requestAnimationFrame(() => {
+                setFocusId(newMcq.id);
+                const el = document.getElementById(newMcq.id);
+                let target: HTMLElement | null = el;
+                if (target && !target.isContentEditable) {
+                    const edit = target.querySelector<HTMLElement>('[contenteditable="true"]');
+                    if (edit) target = edit;
                 }
-                const lastIndex = (() => {
-                    let last = -1;
-                    prevBlocks.forEach((b, idx) => {
-                        if (b.type === "multipleChoice-option" && b.parentId === groupId) {
-                            last = idx
-                        }
-                    })
-                    return last
-                })()
-
-                const insertIndex = lastIndex >= 0 ? lastIndex + 1 : prevBlocks.findIndex((b) => b.id === groupId) + 1;
-
-                const newBlocks = [
-                    ...prevBlocks.slice(0, insertIndex),
-                    newMcq,
-                    ...prevBlocks.slice(insertIndex)
-                ]
-
-                requestAnimationFrame(() => {
-                    setFocusId(newMcq.id)
-                    const el = document.getElementById(newMcq.id)
-                    let target: HTMLElement | null = el as HTMLElement | null;
-                    if (target && !target.isContentEditable) {
-                        const edit = target.querySelector<HTMLElement>('[contenteditable="true"]');
-                        if (edit) target = edit
-                    }
-                    if (target) {
-                        target.focus()
-                        const range = document.createRange()
-                        range.selectNodeContents(target)
-                        range.collapse(true)
-                        const sel = window.getSelection()
-                        sel?.removeAllRanges()
-                        sel?.addRange(range)
-
-                    }
-                })
-                return newBlocks
-            })
+                if (target) {
+                    target.focus();
+                    const range = document.createRange();
+                    range.selectNodeContents(target);
+                    range.collapse(true);
+                    const sel = window.getSelection();
+                    sel?.removeAllRanges();
+                    sel?.addRange(range);
+                }
+            });
         }
+
     };
 
     const handleInput = (e: React.KeyboardEvent<HTMLDivElement>) => {
@@ -361,7 +378,7 @@ export const Block = ({ block, }: { block: Blocktype }) => {
                 ...blocks.slice(0, index),
                 ...blocks.slice(index + 1)
             ]
-            setBlocks(newBlocks)
+            setBlocksState(newBlocks)
             if (index > 0) {
                 const prevId = blocks[index - 1].id;
                 const prevDiv = document.getElementById(prevId);
@@ -464,7 +481,7 @@ export const Block = ({ block, }: { block: Blocktype }) => {
             return (
                 <>
                     {mcqOptions.map((mcq, idx) => (
-                        <div className=" flex flex-col  ">
+                        <div key={idx} className=" flex flex-col  ">
                             <div className='flex items-center gap-1 min-w-28 w-fit max-w-full rounded-md shadow-checkbox px-2 pr-4'>
                                 <div className='rounded-[3px] h-[16px] w-[16px] bg-radio  shadow-checkbox p-2 text-xs font-bold text-shadow-xl flex items-center justify-center text-white '>{mcq.letter}</div>
                                 <div
