@@ -271,12 +271,12 @@ export const Block = ({ block, }: { block: Blocktype }) => {
                 return last;
             })()
 
-            const insertIndex = lastIndex >= 0 ? lastIndex + 1 : prevBlocks.findIndex(b => b.id === groupId) + 1;
+            const insertIndex = lastIndex >= 0 ? lastIndex + 1 : blocks.findIndex(b => b.id === groupId) + 1;
 
             const newBlocks = [
-                ...prevBlocks.slice(0, insertIndex),
+                ...blocks.slice(0, insertIndex),
                 newOption,
-                ...prevBlocks.slice(insertIndex),
+                ...blocks.slice(insertIndex),
             ];
 
             requestAnimationFrame(() => {
