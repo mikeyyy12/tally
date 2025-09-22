@@ -15,8 +15,6 @@ export const Block = ({ block, }: { block: Blocktype }) => {
     if (!context) throw new Error("Block context not found")
     const { blocks, undo, setBlocksState, setBlocks, setIsOpen, setCurrentId, focusId, setFocusId } = context;
 
-
-
     useEffect(() => {
         const onKeyDown = (e: KeyboardEvent) => {
             console.log()
@@ -24,7 +22,6 @@ export const Block = ({ block, }: { block: Blocktype }) => {
                 e.preventDefault();
                 undo();
             }
-
         };
         document.addEventListener('keydown', onKeyDown);
         return () => document.removeEventListener('keydown', onKeyDown);
@@ -126,7 +123,7 @@ export const Block = ({ block, }: { block: Blocktype }) => {
     function placeCaretAtX(targetIdx: number, targetX: number) {
         const el = document.getElementById(blocks[targetIdx].id) as HTMLDivElement;
         el?.focus();
-
+        setFocusId(blocks[targetIdx].id)
         const range = document.createRange()
         const sel = window.getSelection()
         if (!sel) return;
@@ -401,7 +398,7 @@ export const Block = ({ block, }: { block: Blocktype }) => {
     switch (block.type) {
         case "text":
             return (
-                <BlockWrapper className='top-[9px]'><div
+                <BlockWrapper focusId={focusId!} blockId={block.id} className='top-[9px]'><div
                     id={block.id}
                     contentEditable
                     suppressContentEditableWarning
@@ -419,7 +416,7 @@ export const Block = ({ block, }: { block: Blocktype }) => {
             )
         case "input":
             return (
-                <BlockWrapper className='top-[9px]'>
+                <BlockWrapper focusId={focusId!} blockId={block.id} className='top-[9px]'>
                     <div
                         id={block.id}
                         data-block-id={block.id}
@@ -444,7 +441,7 @@ export const Block = ({ block, }: { block: Blocktype }) => {
 
                 <div className='flex gap-2 flex-col'>
                     {options.map((opt, idx) => (
-                        <BlockWrapper className='top-[2px]'>
+                        <BlockWrapper focusId={focusId!} blockId={block.id} className='top-[2px]'>
                             <div
                                 key={opt.id}
                                 className='flex items-center gap-2'>
@@ -487,7 +484,7 @@ export const Block = ({ block, }: { block: Blocktype }) => {
 
                 <div className='flex flex-col gap-2 mt-2'>
                     {mcqOptions.map((mcq, idx) => (
-                        <BlockWrapper className='top-[4px]'>
+                        <BlockWrapper focusId={focusId!} blockId={block.id} className='top-[4px]'>
                             <div key={idx} className=" flex flex-col">
                                 <div className='flex items-center gap-1 min-w-28 w-fit max-w-full rounded-md shadow-checkbox px-2 pr-4'>
                                     <div className='rounded-[3px] h-[16px] w-[16px] bg-radio  shadow-checkbox p-2 text-xs font-bold text-shadow-xl flex items-center justify-center text-white '>{mcq.letter}</div>
@@ -523,7 +520,7 @@ export const Block = ({ block, }: { block: Blocktype }) => {
             )
         case "paragraph":
             return (
-                <BlockWrapper className='top-[4px]'>
+                <BlockWrapper focusId={focusId!} blockId={block.id} className='top-[4px]'>
                     <div id={block.id} contentEditable={'true'}
                         data-block-id={block.id}
                         onKeyDown={(e) => handleKeyDown({ e, type: block.type, blockId: block.id })}
