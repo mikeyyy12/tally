@@ -1,4 +1,5 @@
 "use client"
+import { BlockWrapper } from '@/components/block-wrapper';
 import { BlocksContext } from '@/context/context';
 
 import { cn } from '@/utils/cn';
@@ -63,7 +64,6 @@ export const Block = ({ block, }: { block: Blocktype }) => {
         })
     }
 
-
     useEffect(() => {
         const handler = () => {
             const selection = document.getSelection();
@@ -87,28 +87,24 @@ export const Block = ({ block, }: { block: Blocktype }) => {
     }, []);
 
     function isCaretInChexbox() {
-
         if (!focusId) return false;
-
         const focusBlock = blocks.find(b => b.id === focusId)
         if (focusBlock?.type === "checkbox-group") return true
         if (focusBlock?.type === "checkbox-option") return true
-
         return false
     }
+
     function isCaretInMcq() {
         if (!focusId) return false;
         const focusBlock = blocks.find(b => b.id === focusId)
         if (focusBlock?.type === "multipleChoice-group") return true
         if (focusBlock?.type === "multipleChoice-option") return true
-
         return false
     }
 
     function getCaretRect() {
         const sel = window.getSelection();
         if (!sel || sel.rangeCount === 0) return null;
-
         const range = sel.getRangeAt(0).cloneRange();
         range.collapse(true);
         const rects = range.getClientRects();
@@ -129,8 +125,6 @@ export const Block = ({ block, }: { block: Blocktype }) => {
 
     function placeCaretAtX(targetIdx: number, targetX: number) {
         const el = document.getElementById(blocks[targetIdx].id) as HTMLDivElement;
-
-
         el?.focus();
 
         const range = document.createRange()
@@ -182,10 +176,7 @@ export const Block = ({ block, }: { block: Blocktype }) => {
         if (rect) setCaretX(rect.x)
     }
 
-
     const handleKeyDown = ({ e, type, blockId }: { e: React.KeyboardEvent<HTMLDivElement>, type: string, blockId: string }) => {
-
-
         if (e.key == "Enter") {
             e.preventDefault()
             handleEnter({ id: block.id })
@@ -247,9 +238,6 @@ export const Block = ({ block, }: { block: Blocktype }) => {
     const handleAddOption = (groupId: string, type: string) => {
 
         if (type === "checkbox-option") {
-
-
-
             const options = blocks.filter(
                 b => b.type === "checkbox-option" && b.parentId === groupId
             );
@@ -393,9 +381,15 @@ export const Block = ({ block, }: { block: Blocktype }) => {
                     sel?.addRange(range);
                 }
             }
-
         }
     }
+    const handleAdd = () => {
+
+    }
+    const handleDelete = () => {
+
+    }
+
 
     useEffect(() => {
         const handler = () => {
@@ -408,16 +402,21 @@ export const Block = ({ block, }: { block: Blocktype }) => {
     switch (block.type) {
         case "text":
             return (
-                <div id={block.id} contentEditable={'true'}
+                <BlockWrapper><div
+                    id={block.id}
+                    contentEditable
+                    suppressContentEditableWarning
                     data-block-id={block.id}
-                    onKeyDown={(e) => handleKeyDown({ e, type: block.type, blockId: block.id })}
                     data-placeholder={block.label}
                     onInput={handleInput}
-
-                    suppressContentEditableWarning
-                    className={cn("[&:empty]:before:content-[attr(data-placeholder)] [&:empty]:before:text-neutral-400",
+                    onKeyDown={(e) => handleKeyDown({ e, type: block.type, blockId: block.id })}
+                    className={cn(
+                        "[&:empty]:before:content-[attr(data-placeholder)] [&:empty]:before:text-neutral-400",
                         "text-xl text-black focus:outline-none font-semibold tracking-tight px-1 py-1"
-                    )}>{block.content as string}</div>
+                    )}
+                >
+                    {block.content as string}
+                </div></BlockWrapper>
             )
         case "input":
             return (
@@ -442,37 +441,39 @@ export const Block = ({ block, }: { block: Blocktype }) => {
                 .filter((b): b is CheckboxBlock => b.type === "checkbox-option" && b.parentId === block.id)
                 .sort((a, b) => blocks.indexOf(a) - blocks.indexOf(b));
             return (
-                <>
-                    {options.map((opt, idx) => (
-                        <div
-                            key={opt.id}
-                            className='flex items-center gap-2'>
-                            <div className='rounded-[3px]  h-[17px] w-[18px] bg-white  shadow-checkbox'></div>
+                <BlockWrapper>
+                    <div>
+                        {options.map((opt, idx) => (
                             <div
-                                id={opt.id}
-                                data-block-id={opt.id}
-                                onMouseDown={() => setFocusId(opt.id)}
-                                onInput={handleInput}
-                                onKeyDown={(e) => handleKeyDown({ e, type: opt.type, blockId: opt.id })}
-                                suppressContentEditableWarning
-                                data-placeholder={opt.label}
-                                contentEditable="true"
-                                className={cn("[&:empty]:before:content-[attr(data-placeholder)]  [&:empty]:before:text-neutral-400",
-                                    "w-full h-full text-sm  focus:outline-none py-px font-normal"
-                                )} >{opt.value}</div>
-                        </div>
-                    ))}
-                    {isCaretInChexbox() && <div
-                        className='flex items-center gap-2 opacity-20 cursor-pointer hover:opacity-80 ' >
-                        <div className='rounded-[3px]  h-[17px] w-[18px] bg-white  shadow-checkbox'></div>
-                        <div onMouseDown={(e) => {
-                            handleAddOption(block.id, "checkbox-option")
-                        }}
-                            className={cn(
-                                "w-full h-full text-sm  focus:outline-none py-1 font-normal "
-                            )} >Add Option</div>
-                    </div >}
-                </>
+                                key={opt.id}
+                                className='flex items-center gap-2'>
+                                <div className='rounded-[3px]  h-[17px] w-[18px] bg-white  shadow-checkbox'></div>
+                                <div
+                                    id={opt.id}
+                                    data-block-id={opt.id}
+                                    onMouseDown={() => setFocusId(opt.id)}
+                                    onInput={handleInput}
+                                    onKeyDown={(e) => handleKeyDown({ e, type: opt.type, blockId: opt.id })}
+                                    suppressContentEditableWarning
+                                    data-placeholder={opt.label}
+                                    contentEditable="true"
+                                    className={cn("[&:empty]:before:content-[attr(data-placeholder)]  [&:empty]:before:text-neutral-400",
+                                        "w-full h-full text-sm  focus:outline-none py-px font-normal"
+                                    )} >{opt.value}</div>
+                            </div>
+                        ))}
+                        {isCaretInChexbox() && <div
+                            className='flex items-center gap-2 opacity-20 cursor-pointer hover:opacity-80 ' >
+                            <div className='rounded-[3px]  h-[17px] w-[18px] bg-white  shadow-checkbox'></div>
+                            <div onMouseDown={(e) => {
+                                handleAddOption(block.id, "checkbox-option")
+                            }}
+                                className={cn(
+                                    "w-full h-full text-sm  focus:outline-none py-1 font-normal "
+                                )} >Add Option</div>
+                        </div >}
+                    </div>
+                </BlockWrapper>
             )
         case "multipleChoice-group":
             const mcqOptions = blocks.filter((b): b is MultipleChoiceOption => b.type === "multipleChoice-option" && b.parentId == block.id)
