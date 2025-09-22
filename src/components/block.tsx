@@ -421,20 +421,22 @@ export const Block = ({ block, }: { block: Blocktype }) => {
         case "input":
             return (
 
-                <div
-                    id={block.id}
-                    data-block-id={block.id}
-                    data-placeholder={block.label}
-                    contentEditable={'true'}
-                    suppressContentEditableWarning
-                    onInput={handleInput}
-                    onKeyDown={(e) => handleKeyDown({ e, type: block.type, blockId: block.id })}
-                    className={cn("[&:empty]:before:content-[attr(data-placeholder)] [&:empty]:before:text-neutral-400 ",
-                        "w-full h-full text-sm tracking-wide focus:outline-none  font-normal text-neutral-800",
-                        "w-60  shadow-checkbox  rounded-lg px-4 py-2 my-1 text-sm",
-                        "whitespace-nowrap overflow-x-auto overflow-y-hidden scrollbar-hide"
-                    )} >{block.content as string}</div>
+                <BlockWrapper>
+                    <div
+                        id={block.id}
+                        data-block-id={block.id}
+                        data-placeholder={block.label}
+                        contentEditable={'true'}
+                        suppressContentEditableWarning
+                        onInput={handleInput}
+                        onKeyDown={(e) => handleKeyDown({ e, type: block.type, blockId: block.id })}
+                        className={cn("[&:empty]:before:content-[attr(data-placeholder)] [&:empty]:before:text-neutral-400 ",
+                            "w-full h-full text-sm tracking-wide focus:outline-none  font-normal text-neutral-800",
+                            "w-60  shadow-checkbox  rounded-lg px-4 py-2 my-1 text-sm",
+                            "whitespace-nowrap overflow-x-auto overflow-y-hidden scrollbar-hide"
+                        )} >{block.content as string}</div>
 
+                </BlockWrapper>
             )
         case "checkbox-group":
             const options = blocks
@@ -480,50 +482,55 @@ export const Block = ({ block, }: { block: Blocktype }) => {
                 .sort((a, b) => blocks.indexOf(a) - blocks.indexOf(b))
             const nextLetter = String.fromCharCode(65 + mcqOptions.length);
             return (
-                <>
-                    {mcqOptions.map((mcq, idx) => (
-                        <div key={idx} className=" flex flex-col  ">
-                            <div className='flex items-center gap-1 min-w-28 w-fit max-w-full rounded-md shadow-checkbox px-2 pr-4'>
-                                <div className='rounded-[3px] h-[16px] w-[16px] bg-radio  shadow-checkbox p-2 text-xs font-bold text-shadow-xl flex items-center justify-center text-white '>{mcq.letter}</div>
+                <BlockWrapper>
+                    <div>
+                        {mcqOptions.map((mcq, idx) => (
+                            <div key={idx} className=" flex flex-col  ">
+                                <div className='flex items-center gap-1 min-w-28 w-fit max-w-full rounded-md shadow-checkbox px-2 pr-4'>
+                                    <div className='rounded-[3px] h-[16px] w-[16px] bg-radio  shadow-checkbox p-2 text-xs font-bold text-shadow-xl flex items-center justify-center text-white '>{mcq.letter}</div>
+                                    <div
+                                        id={mcq.id} data-block-id={mcq.id}
+                                        onKeyDown={(e) => handleKeyDown({ e, type: mcq.type, blockId: mcq.id })}
+                                        data-placeholder="Input"
+                                        contentEditable="true"
+                                        suppressContentEditableWarning
+                                        className={cn(
+                                            " h-full w-full text-sm focus:outline-none py-[5px] font-normal text-neutral-800"
+                                        )} >{mcq.value}</div>
+                                </div>
+                            </div>
+                        ))}
+                        {isCaretInMcq() && <div className="flex flex-col ">
+                            <div
+                                className='flex items-center gap-2 max-w-fit  rounded-lg shadow-checkbox px-3 opacity-20 hover:opacity-80  cursor-pointer'>
+                                <div className='rounded-[3px]  h-[17px] w-[18px] bg-radio  shadow-checkbox p-2 text-xs font-bold text-shadow-xl flex items-center justify-center text-white '>{nextLetter}</div>
                                 <div
-                                    id={mcq.id} data-block-id={mcq.id}
-                                    onKeyDown={(e) => handleKeyDown({ e, type: mcq.type, blockId: mcq.id })}
                                     data-placeholder="Input"
                                     contentEditable="true"
                                     suppressContentEditableWarning
+                                    onMouseDown={() => handleAddOption(block.id, "multipleChoice-option")}
                                     className={cn(
-                                        " h-full w-full text-sm focus:outline-none py-[5px] font-normal text-neutral-800"
-                                    )} >{mcq.value}</div>
+                                        "w-full h-full text-sm  focus:outline-none py-2 font-normal text-neutral-800"
+                                    )} >Add Option</div>
                             </div>
-                        </div>
-                    ))}
-                    {isCaretInMcq() && <div className="flex flex-col ">
-                        <div
-                            className='flex items-center gap-2 max-w-fit  rounded-lg shadow-checkbox px-3 opacity-20 hover:opacity-80  cursor-pointer'>
-                            <div className='rounded-[3px]  h-[17px] w-[18px] bg-radio  shadow-checkbox p-2 text-xs font-bold text-shadow-xl flex items-center justify-center text-white '>{nextLetter}</div>
-                            <div
-                                data-placeholder="Input"
-                                contentEditable="true"
-                                suppressContentEditableWarning
-                                onMouseDown={() => handleAddOption(block.id, "multipleChoice-option")}
-                                className={cn(
-                                    "w-full h-full text-sm  focus:outline-none py-2 font-normal text-neutral-800"
-                                )} >Add Option</div>
-                        </div>
-                    </div>}
-                </>
+                        </div>}
+                    </div>
+                </BlockWrapper>
             )
         case "paragraph":
-            return (<div id={block.id} contentEditable={'true'}
-                data-block-id={block.id}
-                onKeyDown={(e) => handleKeyDown({ e, type: block.type, blockId: block.id })}
-                data-placeholder={block.label}
-                onInput={handleInput}
-                suppressContentEditableWarning
-                className={cn("[&:empty]:before:content-[attr(data-placeholder)] [&:empty]:before:text-neutral-400 ",
-                    "w-full h-full text-sm tracking-wide focus:outline-none  font-normal text-neutral-800 my-1 px-1",
-                    "whitespace-nowrap overflow-x-auto overflow-y-hidden scrollbar-hide"
-                )}></div>
+            return (
+                <BlockWrapper>
+                    <div id={block.id} contentEditable={'true'}
+                        data-block-id={block.id}
+                        onKeyDown={(e) => handleKeyDown({ e, type: block.type, blockId: block.id })}
+                        data-placeholder={block.label}
+                        onInput={handleInput}
+                        suppressContentEditableWarning
+                        className={cn("[&:empty]:before:content-[attr(data-placeholder)] [&:empty]:before:text-neutral-400 ",
+                            "w-full h-full text-sm tracking-wide focus:outline-none  font-normal text-neutral-800 my-1 px-1",
+                            "whitespace-nowrap overflow-x-auto overflow-y-hidden scrollbar-hide"
+                        )}></div>
+                </BlockWrapper>
             )
 
 
