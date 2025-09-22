@@ -441,7 +441,7 @@ export const Block = ({ block, }: { block: Blocktype }) => {
 
                 <div className='flex gap-2 flex-col'>
                     {options.map((opt, idx) => (
-                        <BlockWrapper focusId={focusId!} blockId={block.id} className='top-[2px]'>
+                        <BlockWrapper focusId={focusId!} blockId={opt.id} className='top-[2px]'>
                             <div
                                 key={opt.id}
                                 className='flex items-center gap-2'>
@@ -484,7 +484,7 @@ export const Block = ({ block, }: { block: Blocktype }) => {
 
                 <div className='flex flex-col gap-2 mt-2'>
                     {mcqOptions.map((mcq, idx) => (
-                        <BlockWrapper focusId={focusId!} blockId={block.id} className='top-[4px]'>
+                        <BlockWrapper focusId={focusId!} blockId={mcq.id} className='top-[4px]'>
                             <div key={idx} className=" flex flex-col">
                                 <div className='flex items-center gap-1 min-w-28 w-fit max-w-full rounded-md shadow-checkbox px-2 pr-4'>
                                     <div className='rounded-[3px] h-[16px] w-[16px] bg-radio  shadow-checkbox p-2 text-xs font-bold text-shadow-xl flex items-center justify-center text-white '>{mcq.letter}</div>
