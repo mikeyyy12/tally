@@ -442,10 +442,9 @@ export const Block = ({ block, }: { block: Blocktype }) => {
                 .sort((a, b) => blocks.indexOf(a) - blocks.indexOf(b));
             return (
 
-                <div className='flex gap-1 flex-col'>
+                <div className='flex gap-2 flex-col'>
                     {options.map((opt, idx) => (
-
-                        <BlockWrapper className='top-[10px]'>
+                        <BlockWrapper className='top-[2px]'>
                             <div
                                 key={opt.id}
                                 className='flex items-center gap-2'>
