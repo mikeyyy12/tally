@@ -69,7 +69,7 @@ export const EditorPage = () => {
     <div
       className="flex flex-col gap-4 px-28 ">
       <div >
-        <input className="text-3xl font-bold text-neutral-800 outline-none p-2 " placeholder="Form title" type="text" onChange={(e: ChangeEvent<HTMLInputElement>) => setFormTitle(e.target.value)} value={formTitle} />
+        <input className="text-3xl font-bold text-neutral-800 outline-none" placeholder="Form title" type="text" onChange={(e: ChangeEvent<HTMLInputElement>) => setFormTitle(e.target.value)} value={formTitle} />
       </div>
       <div className="flex flex-col gap-2 "
       >

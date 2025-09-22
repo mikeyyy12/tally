@@ -390,7 +390,6 @@ export const Block = ({ block, }: { block: Blocktype }) => {
 
     }
 
-
     useEffect(() => {
         const handler = () => {
             updateCaretXFromSelection();
@@ -402,7 +401,7 @@ export const Block = ({ block, }: { block: Blocktype }) => {
     switch (block.type) {
         case "text":
             return (
-                <BlockWrapper><div
+                <BlockWrapper className='top-[9px]'><div
                     id={block.id}
                     contentEditable
                     suppressContentEditableWarning
@@ -420,8 +419,7 @@ export const Block = ({ block, }: { block: Blocktype }) => {
             )
         case "input":
             return (
-
-                <BlockWrapper>
+                <BlockWrapper className='top-[9px]'>
                     <div
                         id={block.id}
                         data-block-id={block.id}
@@ -432,7 +430,7 @@ export const Block = ({ block, }: { block: Blocktype }) => {
                         onKeyDown={(e) => handleKeyDown({ e, type: block.type, blockId: block.id })}
                         className={cn("[&:empty]:before:content-[attr(data-placeholder)] [&:empty]:before:text-neutral-400 ",
                             "w-full h-full text-sm tracking-wide focus:outline-none  font-normal text-neutral-800",
-                            "w-60  shadow-checkbox  rounded-lg px-4 py-2 my-1 text-sm",
+                            "w-60  shadow-checkbox  rounded-lg px-4 py-2 text-sm",
                             "whitespace-nowrap overflow-x-auto overflow-y-hidden scrollbar-hide"
                         )} >{block.content as string}</div>
 
@@ -443,9 +441,11 @@ export const Block = ({ block, }: { block: Blocktype }) => {
                 .filter((b): b is CheckboxBlock => b.type === "checkbox-option" && b.parentId === block.id)
                 .sort((a, b) => blocks.indexOf(a) - blocks.indexOf(b));
             return (
-                <BlockWrapper>
-                    <div>
-                        {options.map((opt, idx) => (
+
+                <div className='flex gap-1 flex-col'>
+                    {options.map((opt, idx) => (
+
+                        <BlockWrapper className='top-[10px]'>
                             <div
                                 key={opt.id}
                                 className='flex items-center gap-2'>
@@ -463,29 +463,33 @@ export const Block = ({ block, }: { block: Blocktype }) => {
                                         "w-full h-full text-sm  focus:outline-none py-px font-normal"
                                     )} >{opt.value}</div>
                             </div>
-                        ))}
-                        {isCaretInChexbox() && <div
-                            className='flex items-center gap-2 opacity-20 cursor-pointer hover:opacity-80 ' >
-                            <div className='rounded-[3px]  h-[17px] w-[18px] bg-white  shadow-checkbox'></div>
-                            <div onMouseDown={(e) => {
-                                handleAddOption(block.id, "checkbox-option")
-                            }}
-                                className={cn(
-                                    "w-full h-full text-sm  focus:outline-none py-1 font-normal "
-                                )} >Add Option</div>
-                        </div >}
-                    </div>
-                </BlockWrapper>
+                        </BlockWrapper>
+                    ))}
+                    {isCaretInChexbox() && <div
+                        className='flex items-center gap-2 opacity-20 cursor-pointer hover:opacity-80 ' >
+                        <div className='rounded-[3px]  h-[17px] w-[18px] bg-white  shadow-checkbox'></div>
+                        <div onMouseDown={(e) => {
+                            handleAddOption(block.id, "checkbox-option")
+                        }}
+                            className={cn(
+                                "w-full h-full text-sm  focus:outline-none py-1 font-normal "
+                            )} >Add Option</div>
+                    </div >
+                    }
+                </div>
+
+
             )
         case "multipleChoice-group":
             const mcqOptions = blocks.filter((b): b is MultipleChoiceOption => b.type === "multipleChoice-option" && b.parentId == block.id)
                 .sort((a, b) => blocks.indexOf(a) - blocks.indexOf(b))
             const nextLetter = String.fromCharCode(65 + mcqOptions.length);
             return (
-                <BlockWrapper>
-                    <div>
-                        {mcqOptions.map((mcq, idx) => (
-                            <div key={idx} className=" flex flex-col  ">
+
+                <div className='flex flex-col gap-2 mt-2'>
+                    {mcqOptions.map((mcq, idx) => (
+                        <BlockWrapper className='top-[4px]'>
+                            <div key={idx} className=" flex flex-col">
                                 <div className='flex items-center gap-1 min-w-28 w-fit max-w-full rounded-md shadow-checkbox px-2 pr-4'>
                                     <div className='rounded-[3px] h-[16px] w-[16px] bg-radio  shadow-checkbox p-2 text-xs font-bold text-shadow-xl flex items-center justify-center text-white '>{mcq.letter}</div>
                                     <div
@@ -499,27 +503,28 @@ export const Block = ({ block, }: { block: Blocktype }) => {
                                         )} >{mcq.value}</div>
                                 </div>
                             </div>
-                        ))}
-                        {isCaretInMcq() && <div className="flex flex-col ">
+                        </BlockWrapper>
+                    ))}
+                    {isCaretInMcq() && <div className="flex flex-col ">
+                        <div
+                            className='flex items-center gap-2 max-w-fit  rounded-lg shadow-checkbox px-3 opacity-20 hover:opacity-80  cursor-pointer'>
+                            <div className='rounded-[3px]  h-[17px] w-[18px] bg-radio  shadow-checkbox p-2 text-xs font-bold text-shadow-xl flex items-center justify-center text-white '>{nextLetter}</div>
                             <div
-                                className='flex items-center gap-2 max-w-fit  rounded-lg shadow-checkbox px-3 opacity-20 hover:opacity-80  cursor-pointer'>
-                                <div className='rounded-[3px]  h-[17px] w-[18px] bg-radio  shadow-checkbox p-2 text-xs font-bold text-shadow-xl flex items-center justify-center text-white '>{nextLetter}</div>
-                                <div
-                                    data-placeholder="Input"
-                                    contentEditable="true"
-                                    suppressContentEditableWarning
-                                    onMouseDown={() => handleAddOption(block.id, "multipleChoice-option")}
-                                    className={cn(
-                                        "w-full h-full text-sm  focus:outline-none py-2 font-normal text-neutral-800"
-                                    )} >Add Option</div>
-                            </div>
-                        </div>}
-                    </div>
-                </BlockWrapper>
+                                data-placeholder="Input"
+                                contentEditable="true"
+                                suppressContentEditableWarning
+                                onMouseDown={() => handleAddOption(block.id, "multipleChoice-option")}
+                                className={cn(
+                                    "w-full h-full text-sm  focus:outline-none py-2 font-normal text-neutral-800"
+                                )} >Add Option</div>
+                        </div>
+                    </div>}
+                </div>
+
             )
         case "paragraph":
             return (
-                <BlockWrapper>
+                <BlockWrapper className='top-[4px]'>
                     <div id={block.id} contentEditable={'true'}
                         data-block-id={block.id}
                         onKeyDown={(e) => handleKeyDown({ e, type: block.type, blockId: block.id })}
