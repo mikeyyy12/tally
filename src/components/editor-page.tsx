@@ -45,7 +45,6 @@ export const EditorPage = () => {
 
   const openModal = () => {
 
-
     setIsOpen(true)
     const caret = getCaretCoordinates();
     if (caret) {
@@ -58,20 +57,20 @@ export const EditorPage = () => {
   }
 
   useEffect(() => {
-
-
+    console.log("opening modal")
     if (isOpen) {
+      console.log("opening modal")
       openModal()
     }
   }, [isOpen])
 
   return (
     <div
-      className="flex flex-col gap-4 px-28 ">
-      <div >
+      className="flex flex-col gap-4 ">
+      <div className="px-28">
         <input className="text-3xl font-bold text-neutral-800 outline-none" placeholder="Form title" type="text" onChange={(e: ChangeEvent<HTMLInputElement>) => setFormTitle(e.target.value)} value={formTitle} />
       </div>
-      <div className="flex flex-col gap-2 "
+      <div className="flex flex-col gap-2  "
       >
         {blocks.map((block, idx) => (
           <Block key={block.id} block={block} />

@@ -161,7 +161,6 @@ export const Block = ({ block, }: { block: Blocktype }) => {
             return;
         }
 
-
         range.setStart(best.node, best.offset)
         range.collapse(true)
         sel.removeAllRanges()
@@ -218,6 +217,7 @@ export const Block = ({ block, }: { block: Blocktype }) => {
 
         else if (e.key === "/" && type == "paragraph") {
             setCurrentId(block.id)
+
             requestAnimationFrame(() => {
                 const selection = window.getSelection();
                 if (selection && selection.rangeCount > 0) {
@@ -229,7 +229,6 @@ export const Block = ({ block, }: { block: Blocktype }) => {
                 }
             });
         }
-
     }
 
     const handleAddOption = (groupId: string, type: string) => {
@@ -438,7 +437,6 @@ export const Block = ({ block, }: { block: Blocktype }) => {
                 .filter((b): b is CheckboxBlock => b.type === "checkbox-option" && b.parentId === block.id)
                 .sort((a, b) => blocks.indexOf(a) - blocks.indexOf(b));
             return (
-
                 <div className='flex gap-2 flex-col'>
                     {options.map((opt, idx) => (
                         <BlockWrapper focusId={focusId!} blockId={opt.id} className='top-[2px]'>
@@ -470,18 +468,14 @@ export const Block = ({ block, }: { block: Blocktype }) => {
                             className={cn(
                                 "w-full h-full text-sm  focus:outline-none py-1 font-normal "
                             )} >Add Option</div>
-                    </div >
-                    }
+                    </div >}
                 </div>
-
-
             )
         case "multipleChoice-group":
             const mcqOptions = blocks.filter((b): b is MultipleChoiceOption => b.type === "multipleChoice-option" && b.parentId == block.id)
                 .sort((a, b) => blocks.indexOf(a) - blocks.indexOf(b))
             const nextLetter = String.fromCharCode(65 + mcqOptions.length);
             return (
-
                 <div className='flex flex-col gap-2 mt-2'>
                     {mcqOptions.map((mcq, idx) => (
                         <BlockWrapper focusId={focusId!} blockId={mcq.id} className='top-[4px]'>
@@ -502,8 +496,7 @@ export const Block = ({ block, }: { block: Blocktype }) => {
                         </BlockWrapper>
                     ))}
                     {isCaretInMcq() && <div className="flex flex-col ">
-                        <div
-                            className='flex items-center gap-2 max-w-fit  rounded-lg shadow-checkbox px-3 opacity-20 hover:opacity-80  cursor-pointer'>
+                        <div className='flex items-center gap-2 max-w-fit  rounded-lg shadow-checkbox px-3 opacity-20 hover:opacity-80  cursor-pointer'>
                             <div className='rounded-[3px]  h-[17px] w-[18px] bg-radio  shadow-checkbox p-2 text-xs font-bold text-shadow-xl flex items-center justify-center text-white '>{nextLetter}</div>
                             <div
                                 data-placeholder="Input"
@@ -533,7 +526,5 @@ export const Block = ({ block, }: { block: Blocktype }) => {
                         )}></div>
                 </BlockWrapper>
             )
-
-
     }
 }
