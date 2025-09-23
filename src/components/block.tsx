@@ -460,7 +460,7 @@ export const Block = ({ block, }: { block: Blocktype }) => {
                         </BlockWrapper>
                     ))}
                     {isCaretInChexbox() && <div
-                        className='flex items-center gap-2 opacity-20 cursor-pointer hover:opacity-80 ' >
+                        className='flex items-center gap-2 opacity-20 cursor-pointer hover:opacity-80 px-28' >
                         <div className='rounded-[3px]  h-[17px] w-[18px] bg-white  shadow-checkbox'></div>
                         <div onMouseDown={(e) => {
                             handleAddOption(block.id, "checkbox-option")
@@ -495,8 +495,8 @@ export const Block = ({ block, }: { block: Blocktype }) => {
                             </div>
                         </BlockWrapper>
                     ))}
-                    {isCaretInMcq() && <div className="flex flex-col ">
-                        <div className='flex items-center gap-2 max-w-fit  rounded-lg shadow-checkbox px-3 opacity-20 hover:opacity-80  cursor-pointer'>
+                    {isCaretInMcq() && <div className="flex flex-col px-28">
+                        <div className='flex items-center gap-2 max-w-fit  rounded-lg shadow-checkbox px-3 opacity-20 hover:opacity-80  cursor-pointer  '>
                             <div className='rounded-[3px]  h-[17px] w-[18px] bg-radio  shadow-checkbox p-2 text-xs font-bold text-shadow-xl flex items-center justify-center text-white '>{nextLetter}</div>
                             <div
                                 data-placeholder="Input"
